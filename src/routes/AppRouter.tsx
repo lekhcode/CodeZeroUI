@@ -26,6 +26,8 @@ import { RegisterPage } from "@/pages/auth/RegisterPage";
 import { VerifyEmailPage } from "@/pages/auth/VerifyEmailPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
+import { LandingPage } from "@/pages/landing/LandingPage";
+import { ROUTES } from "@/constants/routes";
 
 function Lazy({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LazyRouteFallback />}>{children}</Suspense>;
@@ -158,8 +160,8 @@ export function AppRouter() {
           </Route>
         </Route>
 
-        <Route path="/" element={<Navigate to="/community" replace />} />
-        <Route path="*" element={<Navigate to="/community" replace />} />
+        <Route path={ROUTES.landing} element={<LandingPage />} />
+        <Route path="*" element={<Navigate to={ROUTES.landing} replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { ApiRequestError } from "@/services/api";
@@ -10,6 +10,7 @@ import {
   startResendCooldown,
 } from "@/utils/pendingVerification";
 import { AppCopyright } from "@/components/layout/AppCopyright";
+import { AUTH_HOME } from "@/constants/routes";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID ?? "";
@@ -62,7 +63,6 @@ export function LoginPage() {
 
 function LoginPageInner() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -175,7 +175,7 @@ function LoginPageInner() {
       try {
         const data = await authService.googleAuth(credential);
         setSession(data.user, data.accessToken);
-        navigate("/community", { replace: true });
+        navigate(AUTH_HOME, { replace: true });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Google sign-in failed. Try again.");
       } finally {
@@ -271,10 +271,7 @@ function LoginPageInner() {
       }
       const data = await authService.login(normalizedEmail, password);
       setSession(data.user, data.accessToken);
-      const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
-      const dest =
-        from && from !== "/login" && !from.startsWith("/verify-email") ? from : "/community";
-      navigate(dest, { replace: true });
+      navigate(AUTH_HOME, { replace: true });
     } catch (err) {
       if (err instanceof ApiRequestError && err.code === "EMAIL_NOT_VERIFIED") {
         setPendingVerifyEmail(email.trim().toLowerCase());

@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { AUTH_HOME } from "@/constants/routes";
 import { useAuthStore } from "@/store/authStore";
 import { tokenStorage } from "@/utils/storage";
 import { getPendingVerifyEmail } from "@/utils/pendingVerification";
@@ -27,7 +28,7 @@ export function GuestRoute() {
   }
 
   if (user?.isEmailVerified) {
-    return <Navigate to="/community" replace />;
+    return <Navigate to={AUTH_HOME} replace />;
   }
 
   return <Outlet />;

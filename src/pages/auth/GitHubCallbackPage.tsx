@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { AUTH_HOME } from "@/constants/routes";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { tokenStorage } from "@/utils/storage";
@@ -21,7 +22,7 @@ export function GitHubCallbackPage() {
           const user = await authService.me();
           if (!cancelled) {
             setSession(user, token);
-            navigate("/community", { replace: true });
+            navigate(AUTH_HOME, { replace: true });
           }
         } catch {
           if (!cancelled) {
@@ -38,7 +39,7 @@ export function GitHubCallbackPage() {
           const data = await authService.githubExchange(code);
           if (!cancelled) {
             setSession(data.user, data.accessToken);
-            navigate("/community", { replace: true });
+            navigate(AUTH_HOME, { replace: true });
           }
         } catch {
           if (!cancelled) {
