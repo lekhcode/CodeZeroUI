@@ -451,11 +451,42 @@ select:focus-visible {
     transform 150ms ease;
 }
 
-.login-submit-btn:disabled {
+.login-submit-btn:disabled:not(.login-submit-btn--loading) {
   background: var(--neutral-hover);
   color: var(--text-3);
   box-shadow: none;
   cursor: not-allowed;
+}
+
+.login-submit-btn--loading:disabled {
+  background: var(--cta-gradient);
+  color: var(--cta-text);
+  box-shadow: var(--cta-shadow);
+  cursor: wait;
+  opacity: 0.92;
+}
+
+.login-submit-btn__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.login-submit-btn__spinner {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2px solid rgba(10, 11, 13, 0.2);
+  border-top-color: var(--cta-text);
+  border-radius: 50%;
+  animation: login-submit-spin 0.7s linear infinite;
+}
+
+@keyframes login-submit-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .login-submit-btn__label {

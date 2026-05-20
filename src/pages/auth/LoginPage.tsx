@@ -378,9 +378,23 @@ function LoginPageInner() {
 
             {error ? <div className="login-error">{error}</div> : null}
 
-            <button type="submit" disabled={loading} className="login-submit-btn">
-              <span className="login-submit-btn__label">
-                {loading ? "connecting..." : mode === "signin" ? "Sign in →" : "Create account →"}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`login-submit-btn${loading ? " login-submit-btn--loading" : ""}`}
+              aria-busy={loading}
+            >
+              <span className="login-submit-btn__content">
+                {loading ? <span className="login-submit-btn__spinner" aria-hidden /> : null}
+                <span className="login-submit-btn__label">
+                  {loading
+                    ? mode === "signin"
+                      ? "Signing in…"
+                      : "Creating account…"
+                    : mode === "signin"
+                      ? "Sign in →"
+                      : "Create account →"}
+                </span>
               </span>
             </button>
           </form>
