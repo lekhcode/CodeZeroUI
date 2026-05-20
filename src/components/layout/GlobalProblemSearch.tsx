@@ -14,11 +14,12 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { DifficultyChip } from "@/components/ui/DifficultyChip";
+import { DifficultyIndicator } from "@/modules/explore/topic-preview/DifficultyIndicator";
 import { ProblemSolvedIndicator } from "@/components/problems/ProblemSolvedIndicator";
 import { queryKeys } from "@/hooks/queryKeys";
 import { problemsService } from "@/services/problems.service";
 import { rankProblemSearchResults } from "@/utils/problemSearchRank";
+import { problemListLinkRowSx, problemListTokens } from "@/theme/problemList";
 import { miui, monoStatSx } from "@/theme/theme";
 
 const RESULT_LIMIT = 40;
@@ -31,11 +32,12 @@ const SHELL_WIDTH = {
   xl: 480,
 } as const;
 
+/** Opacity + translate only — avoids height layout animation cost. */
 const panelMotion = {
-  initial: { opacity: 0, height: 0 },
-  animate: { opacity: 1, height: "auto" },
-  exit: { opacity: 0, height: 0 },
-  transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const },
+  initial: { opacity: 0, y: -6 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 },
+  transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] as const },
 };
 
 export function GlobalProblemSearch() {
@@ -170,8 +172,8 @@ export function GlobalProblemSearch() {
                     edge="end"
                     sx={{
                       color: miui.textMuted,
-                      transition: "color 150ms ease, transform 150ms ease",
-                      "&:hover": { color: miui.accent, transform: "scale(1.05)" },
+                      transition: "color 150ms ease",
+                      "&:hover": { color: miui.accent },
                     }}
                   >
                     <SearchRoundedIcon fontSize="small" />
@@ -216,8 +218,8 @@ export function GlobalProblemSearch() {
               border: `1px solid ${miui.accentBorder}`,
               borderTop: `1px solid ${miui.border}`,
               bgcolor: "rgba(12, 11, 16, 0.5)",
-              backdropFilter: "blur(18px) saturate(1.15)",
-              WebkitBackdropFilter: "blur(18px) saturate(1.15)",
+              backdropFilter: "blur(12px) saturate(1.1)",
+              WebkitBackdropFilter: "blur(12px) saturate(1.1)",
               boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
               overflow: "hidden",
             }}
@@ -265,16 +267,14 @@ export function GlobalProblemSearch() {
                       <ListItemButton
                         key={item.id}
                         onClick={() => pick(item.slug)}
-                        sx={{
-                          py: 1.1,
-                          px: 1.5,
-                          gap: 1,
+                        sx={problemListLinkRowSx({
+                          py: problemListTokens.rowPy,
+                          px: problemListTokens.rowPx,
+                          gap: problemListTokens.rowGap,
                           alignItems: "flex-start",
-                          borderBottom: `1px solid rgba(30, 28, 40, 0.45)`,
-                          transition: "background-color 120ms ease",
+                          borderBottom: `1px solid ${miui.border}`,
                           "&:last-of-type": { borderBottom: "none" },
-                          "&:hover": { bgcolor: "rgba(33, 30, 46, 0.55)" },
-                        }}
+                        })}
                       >
                         <Typography
                           sx={{
@@ -298,9 +298,10 @@ export function GlobalProblemSearch() {
                             flex: 1,
                             m: 0,
                             "& .MuiListItemText-primary": {
-                              fontSize: "0.875rem",
-                              fontWeight: 500,
-                              lineHeight: 1.35,
+                              fontSize: problemListTokens.titleSize,
+                              fontWeight: problemListTokens.titleWeight,
+                              lineHeight: problemListTokens.titleLineHeight,
+                              color: miui.text,
                               display: "-webkit-box",
                               WebkitLineClamp: 2,
                               WebkitBoxOrient: "vertical",
@@ -310,7 +311,7 @@ export function GlobalProblemSearch() {
                           }}
                         />
                         <Box sx={{ mt: 0.25, flexShrink: 0 }}>
-                          <DifficultyChip difficulty={item.difficulty} />
+                          <DifficultyIndicator difficulty={item.difficulty} />
                         </Box>
                       </ListItemButton>
                     ))}

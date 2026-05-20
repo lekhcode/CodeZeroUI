@@ -4,6 +4,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { Link as RouterLink } from "react-router-dom";
 import type { BrainCacheRevisionTask } from "@/types/brainCache.types";
 import { DifficultyChip } from "@/components/ui/DifficultyChip";
+import { problemListTitleSx, problemListTokens } from "@/theme/problemList";
 import { miui, sectionInsetX } from "@/theme/theme";
 
 type BrainCacheRevisionRowProps = {
@@ -43,16 +44,11 @@ export function BrainCacheRevisionRow({
           component={RouterLink}
           to={`/problems/${task.problem.slug}`}
           sx={{
-            fontSize: "14px",
-            fontWeight: 500,
-            fontFamily: '"Space Grotesk", sans-serif',
-            color: miui.text,
+            ...problemListTitleSx(),
             textDecoration: "none",
             display: "block",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            "&:hover": { color: miui.primary },
+            transition: problemListTokens.hoverTransition,
+            "&:hover": { color: miui.text },
           }}
         >
           {task.problem.title}

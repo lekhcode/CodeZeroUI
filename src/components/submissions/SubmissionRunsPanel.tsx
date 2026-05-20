@@ -15,6 +15,8 @@ import type { SubmissionListItem, SubmissionStatus } from "@/types/api.types";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SubmissionRunsTable } from "@/components/submissions/SubmissionRunsTable";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
+import { useFluentScroll } from "@/hooks/useFluentScroll";
 import { miui, sectionCardSx, sectionHeaderSx, sectionInsetX } from "@/theme/theme";
 
 const VERDICT_FILTERS: Array<{ value: SubmissionStatus | "ALL"; label: string }> = [
@@ -116,6 +118,7 @@ export function SubmissionRunsPanel({
   loading,
   error,
 }: SubmissionRunsPanelProps) {
+  const tableScrollRef = useFluentScroll<HTMLDivElement>();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const hasActiveFilters = verdict !== "ALL" || language !== "ALL";
 
@@ -224,11 +227,13 @@ export function SubmissionRunsPanel({
       </Collapse>
 
       <Box
-        className="app-scroll"
+        ref={tableScrollRef}
+        className={`app-scroll ${FLUENT_PAGE.submissions}`}
         sx={{
           flex: 1,
           minHeight: 0,
           overflow: "auto",
+          overflowX: "hidden",
           WebkitOverflowScrolling: "touch",
           px: sectionInsetX,
           py: 1.25,

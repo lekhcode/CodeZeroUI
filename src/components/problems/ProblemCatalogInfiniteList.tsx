@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useFluentScroll } from "@/hooks/useFluentScroll";
 import { Alert, Box, CircularProgress, Typography, alpha } from "@mui/material";
 import { ProblemCatalogVirtualTable } from "@/components/problems/ProblemCatalogVirtualTable";
 import { ProblemCatalogStaticTable } from "@/components/problems/ProblemCatalogStaticTable";
@@ -14,11 +15,26 @@ type ProblemCatalogInfiniteListProps = {
   filters: CatalogFilterState;
   pageSize?: number;
   compact?: boolean;
+  /** Lab: borderless floating list + lighter scroll */
+  flat?: boolean;
   maxHeight?: number | string;
-  /** Dashboard preview: render all rows without virtualizer (avoids blank-until-scroll). */
+  /** Small lists (dashboard): static rows — instant paint, no virtualizer blank gap. */
   virtualized?: boolean;
+  /** Dashboard preview: cache shuffle results, keep prior rows while refetching. */
+  preview?: boolean;
   /** When false, only the first page is fetched (no scroll-to-load). */
   enableLoadMore?: boolean;
+  /**
+   * When false, list flows in the page (no inner scroll box).
+   * Use on dashboard — avoids nested scroll jank.
+   */
+  scrollContained?: boolean;
+  /** Lab: list fills remaining shell height (single scroll root). */
+  fillHeight?: boolean;
+  /** Fluent scroll root class (e.g. FLUENT_PAGE.lab). */
+  scrollPageClass?: string;
+  /** Lab: page scroll parent — list flows inside it (no nested scroll box). */
+  externalScrollRef?: RefObject<HTMLDivElement | null>;
   /** Receives filtered total and solved count (when logged in). */
   onListStats?: Dispatch<SetStateAction<{ total: number; solvedCount?: number }>>;
 };
@@ -29,12 +45,22 @@ export function ProblemCatalogInfiniteList({
   filters,
   pageSize = 50,
   compact = false,
+  flat = false,
   maxHeight = DEFAULT_LAB_HEIGHT,
   virtualized = true,
   enableLoadMore = true,
+  scrollContained = true,
+  fillHeight = false,
+  scrollPageClass,
+  externalScrollRef,
+  preview = false,
   onListStats,
 }: ProblemCatalogInfiniteListProps) {
-  const scrollRootRef = useRef<HTMLDivElement>(null);
+  const internalScrollRef = useFluentScroll<HTMLDivElement>();
+  const scrollRootRef = externalScrollRef ?? internalScrollRef;
+  const usesExternalScroll = externalScrollRef !== undefined;
+  const hasScrollRoot = scrollContained || usesExternalScroll;
+  const scrollClassName = ["app-scroll", scrollPageClass].filter(Boolean).join(" ");
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -47,7 +73,7 @@ export function ProblemCatalogInfiniteList({
     hasNextPage,
     fetchNextPage,
     solvedCount,
-  } = useProblemCatalogInfinite(filters, pageSize);
+  } = useProblemCatalogInfinite(filters, pageSize, { preview });
 
   useEffect(() => {
     onListStats?.({ total, solvedCount });
@@ -56,37 +82,91 @@ export function ProblemCatalogInfiniteList({
   const fetchNextPageRef = useRef(fetchNextPage);
   fetchNextPageRef.current = fetchNextPage;
 
-  const loadMore = useCallback(() => {
-    if (!enableLoadMore) {
-      return;
-    }
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPageRef.current();
-    }
-  }, [enableLoadMore, hasNextPage, isFetchingNextPage]);
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  hasNextPageRef.current = hasNextPage;
+  isFetchingNextPageRef.current = isFetchingNextPage;
 
   useEffect(() => {
     if (!enableLoadMore) {
       return;
     }
-    const sentinel = sentinelRef.current;
+
+    let observer: IntersectionObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let activeRoot: HTMLDivElement | null = null;
+
+    const tryLoadMore = () => {
+      const root = scrollRootRef.current;
+      if (!root || !hasNextPageRef.current || isFetchingNextPageRef.current) {
+        return;
+      }
+      const { scrollTop, clientHeight, scrollHeight } = root;
+      if (clientHeight < 120) {
+        return;
+      }
+      if (scrollTop + clientHeight < scrollHeight - 80) {
+        return;
+      }
+      isFetchingNextPageRef.current = true;
+      void fetchNextPageRef.current().finally(() => {
+        isFetchingNextPageRef.current = false;
+      });
+    };
+
+    const bind = (root: HTMLDivElement) => {
+      if (activeRoot === root && observer !== null) {
+        return;
+      }
+      if (observer !== null) {
+        observer.disconnect();
+      }
+      if (activeRoot !== null) {
+        activeRoot.removeEventListener("scroll", onScroll);
+      }
+
+      activeRoot = root;
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) {
+            tryLoadMore();
+          }
+        },
+        { root, rootMargin: "0px", threshold: 0 },
+      );
+      const sentinel = sentinelRef.current;
+      if (sentinel !== null) {
+        observer.observe(sentinel);
+      }
+      root.addEventListener("scroll", onScroll, { passive: true });
+    };
+
+    const onScroll = () => tryLoadMore();
+
+    const setup = () => {
+      const root = scrollRootRef.current;
+      if (root === null || sentinelRef.current === null) {
+        return;
+      }
+      bind(root);
+    };
+
+    setup();
+
     const root = scrollRootRef.current;
-    if (sentinel === null || root === null) {
-      return;
+    if (root !== null && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(setup);
+      resizeObserver.observe(root);
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
-      },
-      { root, rootMargin: "120px", threshold: 0 },
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [enableLoadMore, loadMore, items.length, hasNextPage]);
+    return () => {
+      observer?.disconnect();
+      resizeObserver?.disconnect();
+      if (activeRoot !== null) {
+        activeRoot.removeEventListener("scroll", onScroll);
+      }
+    };
+  }, [enableLoadMore, hasScrollRoot, items.length]);
 
   if (isLoading && items.length === 0) {
     return <LoadingSkeleton variant="list" count={compact ? 6 : 10} />;
@@ -110,24 +190,85 @@ export function ProblemCatalogInfiniteList({
   }
 
   const table = virtualized ? (
-    <ProblemCatalogVirtualTable items={items} compact={compact} scrollRef={scrollRootRef} />
+    <ProblemCatalogVirtualTable
+      items={items}
+      compact={compact}
+      flat={flat}
+      scrollRef={hasScrollRoot ? scrollRootRef : undefined}
+    />
   ) : (
-    <ProblemCatalogStaticTable items={items} compact={compact} />
+    <ProblemCatalogStaticTable items={items} compact={compact} flat={flat} />
   );
+
+  if (!scrollContained || usesExternalScroll) {
+    return (
+      <Box
+        sx={{
+          borderRadius: flat ? 0 : 2,
+          bgcolor: flat ? "transparent" : alpha(miui.bg, 0.35),
+          border: flat ? "none" : `1px solid ${miui.border}`,
+        }}
+      >
+        {table}
+
+        {enableLoadMore && (
+          <>
+            <Box ref={sentinelRef} sx={{ height: 8, width: "100%" }} aria-hidden />
+
+            {isFetchingNextPage && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1.5,
+                  py: 2,
+                }}
+              >
+                <CircularProgress size={22} thickness={5} />
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  Loading more…
+                </Typography>
+              </Box>
+            )}
+
+            {!hasNextPage && !isFetchingNextPage && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", textAlign: "center", py: 2, fontWeight: 600 }}
+              >
+                {items.length >= total
+                  ? `All ${total.toLocaleString()} problems loaded`
+                  : "End of list"}
+              </Typography>
+            )}
+          </>
+        )}
+      </Box>
+    );
+  }
+
+  const heightSx = fillHeight
+    ? { flex: 1, minHeight: 0, height: "100%", maxHeight: "100%" }
+    : {
+        maxHeight,
+        minHeight: compact ? 280 : flat ? 360 : 400,
+      };
 
   return (
     <Box
-      ref={scrollRootRef}
-      className="app-scroll"
+      ref={internalScrollRef}
+      className={scrollClassName}
       sx={{
-        maxHeight,
-        minHeight: compact ? 280 : 400,
+        ...heightSx,
         overflowY: "auto",
         overflowX: "hidden",
-        borderRadius: 2,
-        bgcolor: alpha(miui.bg, 0.35),
-        border: `1px solid ${miui.border}`,
+        borderRadius: flat ? 0 : 2,
+        bgcolor: flat ? "transparent" : alpha(miui.bg, 0.35),
+        border: flat ? "none" : `1px solid ${miui.border}`,
         WebkitOverflowScrolling: "touch",
+        overscrollBehavior: fillHeight ? "contain" : undefined,
       }}
     >
       {table}

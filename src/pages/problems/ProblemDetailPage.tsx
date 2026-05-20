@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { Alert, Box, Chip, Stack, Typography } from "@mui/material";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import { useQuery } from "@tanstack/react-query";
@@ -7,7 +7,9 @@ import { AutoRevisionReturnMarker } from "@/components/smartRevisions/AutoRevisi
 import { PageContainer } from "@/components/ui/PageContainer";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { DifficultyChip } from "@/components/ui/DifficultyChip";
-import { ProblemJudgeWorkspace } from "@/modules/judge/ProblemJudgeWorkspace";
+const ProblemJudgeWorkspace = lazy(() =>
+  import("@/modules/judge/ProblemJudgeWorkspace").then((m) => ({ default: m.ProblemJudgeWorkspace })),
+);
 import { BrainCacheProblemPanel } from "@/components/brainCache/BrainCacheProblemPanel";
 import { problemsService } from "@/services/problems.service";
 import { judgeService } from "@/services/judge.service";
@@ -80,13 +82,15 @@ export function ProblemDetailPage() {
     queryKey: queryKeys.problem(slug ?? ""),
     queryFn: () => problemsService.getBySlug(slug!),
     enabled: Boolean(slug),
+    staleTime: 120_000,
+    gcTime: 10 * 60_000,
   });
 
   const judgeQuery = useQuery({
     queryKey: [...queryKeys.judgeMeta(slug ?? ""), isAuthenticated] as const,
     queryFn: () => judgeService.getJudgeMeta(slug!),
     enabled: Boolean(slug),
-    staleTime: 0,
+    staleTime: 30_000,
   });
 
   if (!slug) {
@@ -154,7 +158,9 @@ export function ProblemDetailPage() {
           </Stack>
 
           <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <ProblemJudgeWorkspace slug={slug} problem={detailQuery.data} judgeMeta={judgeQuery.data} />
+            <Suspense fallback={<LoadingSkeleton variant="detail" />}>
+              <ProblemJudgeWorkspace slug={slug} problem={detailQuery.data} judgeMeta={judgeQuery.data} />
+            </Suspense>
           </Box>
         </Box>
       )}

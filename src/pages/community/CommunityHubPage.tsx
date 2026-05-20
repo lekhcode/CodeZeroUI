@@ -1,6 +1,8 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { FixedPageShell } from "@/components/layout/FixedPageShell";
+import { FluentScrollBox } from "@/components/layout/FluentScrollBox";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import { ForumFeedPost } from "@/components/forum/ForumFeedPost";
 import { ForumHeadlineSection } from "@/components/forum/ForumHeadlineSection";
 import { ForumPostComposer } from "@/components/forum/ForumPostComposer";
@@ -17,6 +19,7 @@ export function CommunityHubPage() {
   const hubQuery = useQuery({
     queryKey: queryKeys.forumHub,
     queryFn: forumService.getHubFeed,
+    staleTime: 90_000,
   });
 
   const feedQuery = useInfiniteQuery({
@@ -29,6 +32,7 @@ export function CommunityHubPage() {
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => (last.hasMore ? (last.nextCursor ?? undefined) : undefined),
+    staleTime: 60_000,
   });
 
   const feed = hubQuery.data;
@@ -101,7 +105,10 @@ export function CommunityHubPage() {
             All recent
           </Typography>
 
-          <Box className="app-scroll" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overflowX: "hidden" }}>
+          <FluentScrollBox
+            pageClass={FLUENT_PAGE.community}
+            sx={{ flex: 1, minHeight: 0, overflowY: "auto", overflowX: "hidden" }}
+          >
             {feedQuery.isLoading && <LoadingSkeleton count={5} />}
 
             {allRecent.map((post, index) => (
@@ -121,7 +128,7 @@ export function CommunityHubPage() {
                 </Button>
               </Box>
             )}
-          </Box>
+          </FluentScrollBox>
         </Box>
 
         <Box

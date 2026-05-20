@@ -1,5 +1,6 @@
 import { Box, type BoxProps } from "@mui/material";
 import type { ReactNode } from "react";
+import { useFluentScroll } from "@/hooks/useFluentScroll";
 import { MotionFadeIn } from "./MotionFadeIn";
 
 type PageContainerProps = BoxProps & {
@@ -9,7 +10,9 @@ type PageContainerProps = BoxProps & {
 };
 
 /** Page padding; scrollable by default inside the app shell. */
-export function PageContainer({ children, fixed = false, sx, ...props }: PageContainerProps) {
+export function PageContainer({ children, fixed = false, sx, className, ...props }: PageContainerProps) {
+  const scrollRef = useFluentScroll<HTMLDivElement>();
+  const scrollClassName = ["app-scroll", className].filter(Boolean).join(" ");
   if (fixed) {
     return (
       <Box
@@ -44,9 +47,10 @@ export function PageContainer({ children, fixed = false, sx, ...props }: PageCon
         overflow: "hidden",
       }}
     >
-      <MotionFadeIn>
+      <MotionFadeIn animate={false}>
         <Box
-          className="app-scroll"
+          ref={scrollRef}
+          className={scrollClassName}
           sx={{
             height: "100%",
             flex: 1,

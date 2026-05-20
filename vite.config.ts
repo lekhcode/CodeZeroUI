@@ -13,6 +13,25 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("monaco-editor") || id.includes("@monaco-editor")) {
+            return "monaco";
+          }
+          if (id.includes("framer-motion")) return "motion";
+          if (id.includes("@mui/icons-material")) return "mui-icons";
+          if (id.includes("@mui/material") || id.includes("@emotion")) return "mui";
+          if (id.includes("@tanstack")) return "query";
+          if (id.includes("react-router")) return "router";
+          if (id.includes("react-dom") || id.includes("/react/")) return "react";
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
   server: {
     port: 5173,
     proxy: {

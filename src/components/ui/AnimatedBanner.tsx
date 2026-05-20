@@ -14,6 +14,8 @@ type AnimatedBannerProps = {
   accentSecondary?: string;
   /** Lighter motion for compact strips */
   subtle?: boolean;
+  /** No framer loops — for scroll-heavy pages (dashboard). */
+  static?: boolean;
 };
 
 const orbDriftA = {
@@ -34,9 +36,25 @@ export function AnimatedBanner({
   accent = miui.primary,
   accentSecondary = miui.accent,
   subtle = false,
+  static: isStatic = false,
 }: AnimatedBannerProps) {
   const orbScale = subtle ? 0.75 : 1;
   const orbOpacity = subtle ? 0.1 : 0.16;
+
+  if (isStatic) {
+    return (
+      <Box
+        sx={{
+          position: "relative",
+          overflow: "clip",
+          contain: "layout style paint",
+          ...sx,
+        }}
+      >
+        <Box sx={{ position: "relative", zIndex: 1 }}>{children}</Box>
+      </Box>
+    );
+  }
 
   return (
     <Box

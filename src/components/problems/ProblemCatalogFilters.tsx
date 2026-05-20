@@ -26,6 +26,8 @@ type ProblemCatalogFiltersProps = {
   onDifficultyChange: (value: DifficultyLevel[]) => void;
   includePremium: boolean;
   onIncludePremiumChange: (value: boolean) => void;
+  /** Lab problems panel — flat strip above the list */
+  variant?: "card" | "embedded";
 };
 
 export function ProblemCatalogFilters({
@@ -35,18 +37,12 @@ export function ProblemCatalogFilters({
   onDifficultyChange,
   includePremium,
   onIncludePremiumChange,
+  variant = "card",
 }: ProblemCatalogFiltersProps) {
-  return (
-    <AnimatedBanner
-      subtle
-      sx={{
-        p: 2,
-        borderRadius: 2.5,
-        border: `1px solid ${miui.border}`,
-        bgcolor: miui.paper,
-        boxShadow: "none",
-      }}
-    >
+  const embedded = variant === "embedded";
+
+  const controls = (
+    <>
       <TextField
         fullWidth
         size="small"
@@ -55,20 +51,20 @@ export function ProblemCatalogFilters({
         onChange={(e) => onSearchChange(e.target.value)}
         slotProps={{
           input: {
-            startAdornment: <SearchRoundedIcon sx={{ mr: 1, color: "text.secondary", fontSize: 20 }} />,
+            startAdornment: <SearchRoundedIcon sx={{ mr: 1, color: "text.secondary", fontSize: 18 }} />,
             sx: {
-              height: CONTROL_HEIGHT,
+              height: embedded ? 36 : CONTROL_HEIGHT,
               transition: "box-shadow 0.15s ease",
             },
           },
         }}
         sx={{
-          mb: 1.5,
+          mb: embedded ? 1 : 1.5,
           "& .MuiOutlinedInput-root": {
-            bgcolor: "var(--bg-elevated)",
-            borderRadius: 2,
+            bgcolor: embedded ? miui.elevated : "var(--bg-elevated)",
+            borderRadius: embedded ? 1 : 2,
             transition: "background-color 0.15s ease",
-            "& fieldset": { border: "none" },
+            "& fieldset": { border: embedded ? `1px solid ${miui.border}` : "none" },
             "&:hover": {
               bgcolor: "var(--bg-hover)",
             },
@@ -76,27 +72,32 @@ export function ProblemCatalogFilters({
               bgcolor: "var(--bg-active)",
               boxShadow: "none",
             },
-            "&.Mui-focused fieldset": { border: "none" },
+            "&.Mui-focused fieldset": {
+              borderColor: embedded ? miui.borderStrong : "transparent",
+            },
           },
         }}
       />
 
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        spacing={1.5}
+        spacing={1}
         sx={{
           alignItems: { sm: "center" },
           justifyContent: "space-between",
+          gap: 1,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minHeight: CONTROL_HEIGHT }}>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase", flexShrink: 0 }}
-          >
-            Difficulty
-          </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, minHeight: embedded ? 36 : CONTROL_HEIGHT, flexWrap: "wrap" }}>
+          {!embedded ? (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase", flexShrink: 0 }}
+            >
+              Difficulty
+            </Typography>
+          ) : null}
           <ToggleButtonGroup
             exclusive={false}
             size="small"
@@ -106,19 +107,17 @@ export function ProblemCatalogFilters({
             }}
             aria-label="Difficulty filter"
             sx={{
-              height: CONTROL_HEIGHT,
+              height: embedded ? 34 : CONTROL_HEIGHT,
               gap: 0.5,
               "& .MuiToggleButton-root": {
-                height: CONTROL_HEIGHT - 4,
-                px: 1.75,
+                height: embedded ? 30 : CONTROL_HEIGHT - 4,
+                px: 1.5,
+                fontSize: embedded ? "0.75rem" : undefined,
                 textTransform: "none",
-                fontWeight: 700,
+                fontWeight: 600,
                 borderColor: miui.border,
-                borderRadius: "10px !important",
-                transition: "background-color 0.15s ease, color 0.15s ease, transform 0.12s ease",
-                "&.Mui-selected": {
-                  transform: "scale(1.02)",
-                },
+                borderRadius: "6px !important",
+                transition: "background-color 0.15s ease, color 0.15s ease",
                 "&.Mui-selected.MuiToggleButton-root": {
                   bgcolor: miui.accentDim,
                   color: miui.primary,
@@ -157,13 +156,46 @@ export function ProblemCatalogFilters({
             />
           }
           label={
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              Show premium
+            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: embedded ? "0.75rem" : undefined }}>
+              Premium
             </Typography>
           }
-          sx={{ m: 0, minHeight: CONTROL_HEIGHT, alignItems: "center" }}
+          sx={{ m: 0, minHeight: embedded ? 36 : CONTROL_HEIGHT, alignItems: "center", flexShrink: 0 }}
         />
       </Stack>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <Box
+        sx={{
+          flexShrink: 0,
+          px: 0.5,
+          pt: 0.75,
+          pb: 1,
+          borderBottom: `1px solid ${miui.border}`,
+          bgcolor: miui.paper,
+        }}
+      >
+        {controls}
+      </Box>
+    );
+  }
+
+  return (
+    <AnimatedBanner
+      static
+      subtle
+      sx={{
+        p: 2,
+        borderRadius: 2.5,
+        border: `1px solid ${miui.border}`,
+        bgcolor: miui.paper,
+        boxShadow: "none",
+      }}
+    >
+      {controls}
     </AnimatedBanner>
   );
 }

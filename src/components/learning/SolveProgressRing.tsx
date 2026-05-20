@@ -7,6 +7,8 @@ type SolveProgressRingProps = {
   total: number;
   size?: number;
   label?: string;
+  /** Skip stroke animation (dashboard scroll perf). */
+  animate?: boolean;
 };
 
 export function SolveProgressRing({
@@ -14,6 +16,7 @@ export function SolveProgressRing({
   total,
   size = 120,
   label = "Catalog progress",
+  animate = true,
 }: SolveProgressRingProps) {
   const safeTotal = Math.max(total, 1);
   const pct = Math.min(100, Math.round((solved / safeTotal) * 100));
@@ -34,19 +37,33 @@ export function SolveProgressRing({
             stroke={alpha("#4f46e5", 0.1)}
             strokeWidth={stroke}
           />
-          <motion.circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="url(#progressGradient)"
-            strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 1, ease: "easeOut" }}
-          />
+          {animate ? (
+            <motion.circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke="url(#progressGradient)"
+              strokeWidth={stroke}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: offset }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            />
+          ) : (
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke="url(#progressGradient)"
+              strokeWidth={stroke}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+            />
+          )}
           <defs>
             <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#4f46e5" />

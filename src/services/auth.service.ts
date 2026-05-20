@@ -17,7 +17,9 @@ export const authService = {
   },
 
   resendOtp(email: string) {
-    return unwrap<{ message: string }>(api.post("/api/v1/auth/resend-otp", { email }));
+    return unwrap<{ message: string; resendCooldownSeconds?: number }>(
+      api.post("/api/v1/auth/resend-otp", { email }),
+    );
   },
 
   forgotPassword(email: string) {

@@ -18,6 +18,7 @@ import {
   dueCalendarSummaryPrefix,
   queryKeys,
 } from "@/hooks/queryKeys";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import { getUtcDateKey } from "@/utils/date";
 import { getClientTimezone } from "@/utils/timezone";
 import { dashNavTabSx, miui, sectionContentSx } from "@/theme/theme";
@@ -39,15 +40,13 @@ export function BrainCachePage() {
   const todayQuery = useQuery({
     queryKey: queryKeys.brainCacheToday(todayKey),
     queryFn: brainCacheService.todayRevisions,
-    staleTime: 0,
-    refetchOnMount: "always",
+    staleTime: 45_000,
   });
 
   const overdueQuery = useQuery({
     queryKey: queryKeys.brainCacheOverdue(todayKey),
     queryFn: brainCacheService.overdueRevisions,
-    staleTime: 0,
-    refetchOnMount: "always",
+    staleTime: 45_000,
   });
 
   const analyticsQuery = useQuery({
@@ -155,7 +154,7 @@ export function BrainCachePage() {
         </Badge>
       </Stack>
 
-      <ScrollRegion sx={{ pb: 0.5 }}>
+      <ScrollRegion pageClass={FLUENT_PAGE.brainCache} sx={{ pb: 0.5 }}>
         <BrainCacheHero stats={analyticsQuery.data} loading={analyticsQuery.isLoading} embedded />
 
         {section === "smart" ? (

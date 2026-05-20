@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { authService } from "@/services/auth.service";
 import { miui } from "@/theme/theme";
-import { ApiRequestError } from "@/services/api";
+import { getAuthErrorMessage } from "@/utils/authErrors";
 
 export function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export function ForgotPasswordPage() {
       await authService.forgotPassword(email.trim().toLowerCase());
       navigate(`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`);
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Request failed");
+      setError(getAuthErrorMessage(err, "Request failed"));
     } finally {
       setLoading(false);
     }

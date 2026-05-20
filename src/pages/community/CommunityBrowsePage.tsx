@@ -7,6 +7,7 @@ import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { forumService } from "@/services/forum.service";
 import type { ForumPostType } from "@/types/forum.types";
 import { FORUM_POST_TYPE_META } from "@/utils/forumLabels";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import { miui } from "@/theme/theme";
 
 const VALID_TYPES = new Set<string>(Object.keys(FORUM_POST_TYPE_META));
@@ -56,7 +57,7 @@ export function CommunityBrowsePage() {
         </Button>
       </Stack>
 
-      <ScrollRegion>
+      <ScrollRegion pageClass={FLUENT_PAGE.community}>
         {feedQuery.isLoading && <LoadingSkeleton count={4} />}
         <Stack spacing={1.5}>
           {items.map((post) => (

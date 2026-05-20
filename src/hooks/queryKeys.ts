@@ -8,6 +8,7 @@ export const trackedDuePrefix = ["learning", "due"] as const;
 export const queryKeys = {
   me: ["auth", "me"] as const,
   templates: ["schedule-templates"] as const,
+  templatePreview: (slug: string) => ["schedule-templates", slug, "preview"] as const,
   userSchedules: ["user-schedules"] as const,
   todayAssignments: ["assignments", "today"] as const,
   trackedToday: (dateKey = getUtcDateKey()) => [...trackedTodayPrefix, dateKey] as const,

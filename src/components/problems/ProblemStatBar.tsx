@@ -13,6 +13,8 @@ type ProblemStatBarProps = {
   difficulty: DifficultyLevel[];
   onDifficultyChange: (next: DifficultyLevel[]) => void;
   filteredTotal?: number;
+  /** Lab page — tighter vertical padding on smaller viewports */
+  compact?: boolean;
 };
 
 type SectionKey = "total" | DifficultyLevel;
@@ -31,6 +33,7 @@ export function ProblemStatBar({
   difficulty,
   onDifficultyChange,
   filteredTotal,
+  compact = false,
 }: ProblemStatBarProps) {
   const total = stats?.total ?? 0;
   const easy = stats?.easy ?? 0;
@@ -91,7 +94,7 @@ export function ProblemStatBar({
         bgcolor: miui.paper,
         border: `1px solid ${miui.border}`,
         borderRadius: "12px",
-        py: "20px",
+        py: compact ? { xs: "12px", sm: "14px", md: "16px" } : "20px",
         overflow: "hidden",
       }}
     >

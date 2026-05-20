@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Box,
   Button,
@@ -8,11 +9,11 @@ import {
   Typography,
   alpha,
 } from "@mui/material";
-import { motion } from "framer-motion";
 import { Link as RouterLink } from "react-router-dom";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import { FadeInCard } from "@/components/ui/FadeInCard";
 import type { TrackedAssignment, TrackedAssignmentStatus } from "@/types/api.types";
 import { DifficultyChip } from "@/components/ui/DifficultyChip";
 import { neonGlow } from "@/theme/theme";
@@ -33,7 +34,7 @@ type TrackedAssignmentCardProps = {
   highlightDue?: boolean;
 };
 
-export function TrackedAssignmentCard({
+export const TrackedAssignmentCard = memo(function TrackedAssignmentCard({
   assignment,
   index = 0,
   highlightDue = false,
@@ -43,12 +44,7 @@ export function TrackedAssignmentCard({
   const isOverdue = meta.overdue === true || highlightDue;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
-      whileHover={{ y: -4 }}
-    >
+    <FadeInCard delay={index * 0.04} className="card-hover-lift-4">
       <Card
         sx={{
           height: "100%",
@@ -84,32 +80,24 @@ export function TrackedAssignmentCard({
                 sx={{
                   fontWeight: 800,
                   color: meta.color,
-                  bgcolor: alpha(meta.color, 0.08),
-                  border: `1px solid ${alpha(meta.color, 0.2)}`,
+                  bgcolor: alpha(meta.color, 0.1),
                 }}
               />
-              {assignment.submissionCount > 0 && (
-                <Chip
-                  label={`${assignment.submissionCount} attempt${assignment.submissionCount === 1 ? "" : "s"}`}
-                  size="small"
-                  variant="outlined"
-                />
-              )}
             </Stack>
 
             <Button
               component={RouterLink}
               to={`/problems/${assignment.problem.slug}`}
-              variant={isSolved ? "outlined" : "contained"}
+              variant="contained"
               size="small"
               startIcon={<PlayArrowRoundedIcon />}
-              sx={{ alignSelf: "flex-start", mt: 0.5 }}
+              sx={{ alignSelf: "flex-start" }}
             >
-              {isSolved ? "Review" : isOverdue ? "Resume now" : "Open problem"}
+              {isSolved ? "Review" : "Solve"}
             </Button>
           </Stack>
         </CardContent>
       </Card>
-    </motion.div>
+    </FadeInCard>
   );
-}
+});

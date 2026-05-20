@@ -3,6 +3,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { DifficultyChip } from "@/components/ui/DifficultyChip";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import type { DueCalendarDayResponse, DueItem } from "./due-calendar.types";
+import { problemListMetaSx, problemListTitleSx } from "@/theme/problemList";
 import { miui, monoStatSx } from "@/theme/theme";
 
 const STATUS_STYLES = {
@@ -63,17 +64,10 @@ function DueItemRow({ item }: { item: DueItem }) {
     >
       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography
-            sx={{
-              fontFamily: '"Space Grotesk", sans-serif',
-              fontWeight: 500,
-              fontSize: "0.9375rem",
-              lineHeight: 1.3,
-            }}
-          >
+          <Typography sx={problemListTitleSx({ fontSize: "0.8125rem" })}>
             {item.problemTitle}
           </Typography>
-          <Typography sx={{ fontSize: "0.75rem", color: miui.textMuted, mt: 0.25 }}>
+          <Typography sx={problemListMetaSx({ display: "block", mt: 0.25 })}>
             {item.sourceName}
           </Typography>
         </Box>

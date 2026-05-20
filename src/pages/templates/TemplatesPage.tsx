@@ -1,14 +1,17 @@
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FixedPageShell, ScrollRegion } from "@/components/layout/FixedPageShell";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { ExploreScheduleCard } from "@/components/cards/ExploreScheduleCard";
 import { schedulesService } from "@/services/schedules.service";
 import { queryKeys } from "@/hooks/queryKeys";
 import { CreateScheduleModal } from "@/modules/schedules/CreateScheduleModal";
+import { TopicPreviewModal } from "@/modules/explore/topic-preview/TopicPreviewModal";
 import type { ScheduleTemplate, ScheduleType } from "@/types/api.types";
 import { EXPLORE_SECTION_ORDER, EXPLORE_SECTION_TITLES } from "@/utils/scheduleCopy";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import { dashNavTabSx, miui } from "@/theme/theme";
 
 type Filter = "ALL" | ScheduleType;
@@ -21,7 +24,9 @@ const FILTERS: Array<{ id: Filter; label: string }> = [
 ];
 
 export function TemplatesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [modalTemplate, setModalTemplate] = useState<ScheduleTemplate | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<ScheduleTemplate | null>(null);
   const [filter, setFilter] = useState<Filter>("ALL");
 
   const templatesQuery = useQuery({
@@ -51,6 +56,23 @@ export function TemplatesPage() {
   }, [templatesQuery.data]);
 
   const sectionsToShow = filter === "ALL" ? EXPLORE_SECTION_ORDER : [filter];
+
+  useEffect(() => {
+    const slug = searchParams.get("preview");
+    if (!slug || !templatesQuery.data) return;
+    const match = templatesQuery.data.find((t) => t.slug === slug);
+    if (match && (match.type === "TOPIC" || match.type === "STUDY_PLAN")) {
+      setPreviewTemplate(match);
+    }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("preview");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [templatesQuery.data, searchParams, setSearchParams]);
 
   return (
     <FixedPageShell sx={{ bgcolor: miui.bg }}>
@@ -89,10 +111,11 @@ export function TemplatesPage() {
         ))}
       </Box>
 
-      <ScrollRegion>
-        {templatesQuery.isLoading && <LoadingSkeleton count={6} />}
+      <ScrollRegion pageClass={FLUENT_PAGE.explore}>
+        {(templatesQuery.isPending || schedulesQuery.isPending) && <LoadingSkeleton count={6} />}
 
         {templatesQuery.data &&
+          !templatesQuery.isPending &&
           sectionsToShow.map((type) => {
             const items = grouped[type];
             if (items.length === 0) return null;
@@ -123,6 +146,11 @@ export function TemplatesPage() {
                         template={template}
                         enrolled={enrolledSlugs.has(template.slug)}
                         onEnroll={() => setModalTemplate(template)}
+                        onPreview={
+                          template.type === "TOPIC" || template.type === "STUDY_PLAN"
+                            ? () => setPreviewTemplate(template)
+                            : undefined
+                        }
                       />
                     </Grid>
                   ))}
@@ -131,6 +159,17 @@ export function TemplatesPage() {
             );
           })}
       </ScrollRegion>
+
+      <TopicPreviewModal
+        template={previewTemplate}
+        open={Boolean(previewTemplate)}
+        enrolled={previewTemplate ? enrolledSlugs.has(previewTemplate.slug) : false}
+        onClose={() => setPreviewTemplate(null)}
+        onAddSchedule={(t) => {
+          setPreviewTemplate(null);
+          setModalTemplate(t);
+        }}
+      />
 
       <CreateScheduleModal
         template={modalTemplate}

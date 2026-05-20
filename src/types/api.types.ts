@@ -39,6 +39,7 @@ export type RegisterResult = {
   user: PublicUser;
   requiresVerification: true;
   message: string;
+  resendCooldownSeconds?: number;
 };
 
 export type ScheduleTemplate = {
@@ -60,6 +61,7 @@ export type UserSchedule = {
   active: boolean;
   dailyQuestions: number | null;
   difficulty: DifficultyLevel | null;
+  difficultyFilters?: DifficultyLevel[];
   createdAt: string;
   template: {
     id: string;
@@ -168,6 +170,29 @@ export type CreateUserScheduleInput = {
   templateSlug: string;
   dailyQuestions?: number;
   difficulty?: DifficultyLevel;
+  difficulties?: Array<"EASY" | "MEDIUM" | "HARD">;
+};
+
+export type TemplatePreviewProblem = {
+  order: number;
+  slug: string;
+  title: string;
+  difficulty: DifficultyLevel;
+  topics: string[];
+  isPremium: boolean;
+  hasDetail: boolean;
+};
+
+export type TemplatePreviewPayload = {
+  templateSlug: string;
+  templateName: string;
+  templateType: ScheduleType;
+  allowsDifficulty: boolean;
+  allowsCount: boolean;
+  defaultCount: number | null;
+  total: number;
+  stats: { easy: number; medium: number; hard: number };
+  problems: TemplatePreviewProblem[];
 };
 
 export type TrackedAssignmentStatus = "PENDING" | "SOLVED" | "MISSED" | "SKIPPED";

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -10,7 +11,13 @@ import { miui, monoStatSx } from "@/theme/theme";
 
 dayjs.extend(relativeTime);
 
-export function ForumFeedPost({ post, index = 0 }: { post: ForumPostSummary; index?: number }) {
+export const ForumFeedPost = memo(function ForumFeedPost({
+  post,
+  index = 0,
+}: {
+  post: ForumPostSummary;
+  index?: number;
+}) {
   const typeMeta = FORUM_POST_TYPE_META[post.type];
   const name = authorDisplayName(post.author.name, post.author.email);
   const handle = authorHandle(post.author.username);
@@ -130,4 +137,4 @@ export function ForumFeedPost({ post, index = 0 }: { post: ForumPostSummary; ind
       </Typography>
     </Box>
   );
-}
+});

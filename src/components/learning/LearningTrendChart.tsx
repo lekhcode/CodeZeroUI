@@ -12,6 +12,10 @@ const PAD_Y = 8;
 
 type LearningTrendChartProps = {
   insights: LearningInsights;
+  /** Compact strip for dashboard hero — flush with banner, no box chrome */
+  embedded?: boolean;
+  /** Dashboard: no hover tracking (fewer updates while scrolling). */
+  interactive?: boolean;
 };
 
 type PlotPoint = {
@@ -58,7 +62,11 @@ function buildPlot(points: LearningInsights["dailyPoints"]): PlotPoint[] {
   });
 }
 
-export function LearningTrendChart({ insights }: LearningTrendChartProps) {
+export function LearningTrendChart({
+  insights,
+  embedded = false,
+  interactive = true,
+}: LearningTrendChartProps) {
   const plot = useMemo(() => buildPlot(insights.dailyPoints), [insights.dailyPoints]);
   const chartRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -101,16 +109,53 @@ export function LearningTrendChart({ insights }: LearningTrendChartProps) {
   const lastDate = plot[lastIndex]?.date;
 
   return (
-    <Box sx={{ ...sectionCardSx, ...sectionContentSx, borderRadius: 2, width: "100%" }}>
-      <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 1, mb: 0.75 }}>
-        <Typography variant="caption" sx={{ fontWeight: 700, color: "text.primary", fontSize: "0.75rem" }}>
+    <Box
+      sx={
+        embedded
+          ? { width: "100%", minWidth: 0 }
+          : { ...sectionCardSx, ...sectionContentSx, borderRadius: 2, width: "100%" }
+      }
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 1,
+          mb: embedded ? 0.35 : 0.75,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: embedded ? 500 : 700,
+            color: embedded ? miui.textDim : "text.primary",
+            fontSize: embedded ? "0.625rem" : "0.75rem",
+            letterSpacing: embedded ? "0.06em" : undefined,
+            textTransform: embedded ? "uppercase" : undefined,
+          }}
+        >
           Progress · {insights.rangeDays}d
         </Typography>
         {hasActivity && active && (
-          <Typography variant="caption" sx={{ fontWeight: 700, color: "primary.main", fontSize: "0.75rem" }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: embedded ? 500 : 700,
+              color: embedded ? miui.textMuted : "primary.main",
+              fontSize: embedded ? "0.625rem" : "0.75rem",
+            }}
+          >
             {active.cumulative} total
             {activeIndex !== null && (
-              <Box component="span" sx={{ color: "text.secondary", fontWeight: 500, ml: 0.5 }}>
+              <Box
+                component="span"
+                sx={{
+                  color: embedded ? miui.textDim : "text.secondary",
+                  fontWeight: 500,
+                  ml: 0.5,
+                }}
+              >
                 · {dayjs(active.date).format("MMM D")}
               </Box>
             )}
@@ -120,19 +165,26 @@ export function LearningTrendChart({ insights }: LearningTrendChartProps) {
 
       <Box
         ref={chartRef}
-        onMouseMove={(e) => pickIndex(e.clientX)}
-        onMouseLeave={() => setActiveIndex(null)}
-        onTouchMove={(e) => {
-          const t = e.touches[0];
-          if (t) pickIndex(t.clientX);
-        }}
+        onMouseMove={interactive ? (e) => pickIndex(e.clientX) : undefined}
+        onMouseLeave={interactive ? () => setActiveIndex(null) : undefined}
+        onTouchMove={
+          interactive
+            ? (e) => {
+                const t = e.touches[0];
+                if (t) pickIndex(t.clientX);
+              }
+            : undefined
+        }
         sx={{
           position: "relative",
-          height: 72,
-          borderRadius: 1.5,
-          bgcolor: alpha(miui.primary, 0.04),
-          border: `1px solid ${miui.border}`,
-          cursor: hasActivity ? "crosshair" : "default",
+          height: embedded ? 52 : 72,
+          borderRadius: embedded ? 0 : 1.5,
+          bgcolor: embedded ? "transparent" : alpha(miui.primary, 0.04),
+          border: embedded ? "none" : `0.5px solid ${miui.border}`,
+          borderBottom: embedded ? `1px solid ${miui.border}` : undefined,
+          cursor: interactive && hasActivity ? "crosshair" : "default",
+          boxShadow: "none",
+          contain: embedded ? "layout style paint" : undefined,
         }}
       >
         <svg
@@ -206,11 +258,11 @@ export function LearningTrendChart({ insights }: LearningTrendChartProps) {
                 width: 8,
                 height: 8,
                 borderRadius: "50%",
-                bgcolor: miui.paper,
+                bgcolor: embedded ? "transparent" : miui.paper,
                 border: `2px solid ${miui.primary}`,
                 transform: "translate(-50%, -50%)",
                 pointerEvents: "none",
-                boxShadow: `0 1px 4px ${alpha(miui.primary, 0.35)}`,
+                boxShadow: embedded ? "none" : `0 1px 4px ${alpha(miui.primary, 0.35)}`,
               }}
             />
             {activeIndex !== null && (
@@ -242,22 +294,26 @@ export function LearningTrendChart({ insights }: LearningTrendChartProps) {
         )}
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 0.5 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6875rem" }}>
-          {firstDate ? dayjs(firstDate).format("MMM D") : "—"}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6875rem" }}>
-          {lastDate ? dayjs(lastDate).format("MMM D") : "—"}
-        </Typography>
-      </Box>
+      {!embedded ? (
+        <>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6875rem" }}>
+              {firstDate ? dayjs(firstDate).format("MMM D") : "—"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6875rem" }}>
+              {lastDate ? dayjs(lastDate).format("MMM D") : "—"}
+            </Typography>
+          </Box>
 
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ display: "block", mt: 0.5, fontSize: "0.6875rem", lineHeight: 1.35 }}
-      >
-        {insights.totalSolvedInRange} solved · {insights.consistencyPercent}% active (14d)
-      </Typography>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block", mt: 0.5, fontSize: "0.6875rem", lineHeight: 1.35 }}
+          >
+            {insights.totalSolvedInRange} solved · {insights.consistencyPercent}% active (14d)
+          </Typography>
+        </>
+      ) : null}
     </Box>
   );
 }

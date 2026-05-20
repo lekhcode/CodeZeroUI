@@ -2,8 +2,7 @@ import { useMemo } from "react";
 import { Alert, Box, Button, LinearProgress, Link, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
-import { FadeInCard } from "@/components/ui/FadeInCard";
-import { motion } from "framer-motion";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import { FixedPageShell, ScrollRegion } from "@/components/layout/FixedPageShell";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
@@ -58,15 +57,13 @@ export function TodayPage() {
   const todayQuery = useQuery({
     queryKey: queryKeys.trackedToday(todayDateKey),
     queryFn: learningService.getTodayAssignments,
-    staleTime: 0,
-    refetchOnMount: "always",
+    staleTime: 30_000,
   });
 
   const dueQuery = useQuery({
     queryKey: queryKeys.trackedDue(todayDateKey),
     queryFn: learningService.getDueAssignments,
-    staleTime: 0,
-    refetchOnMount: "always",
+    staleTime: 30_000,
   });
 
   const schedulesQuery = useQuery({
@@ -163,7 +160,7 @@ export function TodayPage() {
         </Button>
       </Stack>
 
-      <ScrollRegion sx={{ pb: 0.5 }}>
+      <ScrollRegion pageClass={FLUENT_PAGE.today} sx={{ pb: 0.5 }}>
         {tab === "timeline" ? (
           <DueCalendar
             initialDate={timelineDate}
@@ -179,9 +176,7 @@ export function TodayPage() {
         ) : (
           <>
             {potdHeroAssignment !== undefined ? (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                <TodayPotdHero assignment={potdHeroAssignment} />
-              </motion.div>
+              <TodayPotdHero assignment={potdHeroAssignment} />
             ) : (
               <TodayPotdEnrollBanner enrolled={potdEnrolled} />
             )}
@@ -278,14 +273,13 @@ export function TodayPage() {
                       : "No study-plan items left for today."}
                   </Typography>
                 ) : (
-                  planPendingBySchedule.map((group, gi) => (
-                    <FadeInCard key={group.scheduleName} delay={gi * 0.1}>
-                      <ScheduleAssignmentGroup
-                        scheduleName={group.scheduleName}
-                        scheduleType={group.scheduleType}
-                        assignments={group.items}
-                      />
-                    </FadeInCard>
+                  planPendingBySchedule.map((group) => (
+                    <ScheduleAssignmentGroup
+                      key={group.scheduleName}
+                      scheduleName={group.scheduleName}
+                      scheduleType={group.scheduleType}
+                      assignments={group.items}
+                    />
                   ))
                 )}
               </Box>

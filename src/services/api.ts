@@ -1,5 +1,6 @@
 import axios, { type AxiosError } from "axios";
 import type { ApiErrorBody } from "@/types/api.types";
+import { useAuthStore } from "@/store/authStore";
 import { tokenStorage } from "@/utils/storage";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -39,6 +40,7 @@ api.interceptors.response.use(
   (error: AxiosError<ApiErrorBody>) => {
     if (error.response?.status === 401) {
       tokenStorage.clear();
+      useAuthStore.getState().logout();
     }
     const message =
       error.response?.data?.error?.message ??

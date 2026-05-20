@@ -1,97 +1,85 @@
-import { Alert, Box, Button, Stack, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
-import { OtpInput } from "@/components/auth/OtpInput";
+import { useEffect } from "react";
+import { Link as RouterLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { OtpVerificationExperience } from "@/components/auth/OtpVerificationExperience";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
+import {
+  clearPendingVerifyEmail,
+  getPendingVerifyEmail,
+  setPendingVerifyEmail,
+  startResendCooldown,
+} from "@/utils/pendingVerification";
 import { miui } from "@/theme/theme";
-import { ApiRequestError } from "@/services/api";
 
-const RESEND_SEC = 60;
+const DEFAULT_COOLDOWN = 60;
 
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const setSession = useAuthStore((s) => s.setSession);
-  const email = searchParams.get("email") ?? "";
 
-  const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [cooldown, setCooldown] = useState(RESEND_SEC);
+  const queryEmail = searchParams.get("email")?.trim().toLowerCase() ?? "";
+  const storedEmail = getPendingVerifyEmail();
+  const email = queryEmail || storedEmail;
+
+  const registerMessage =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "message" in location.state &&
+    typeof (location.state as { message?: string }).message === "string"
+      ? (location.state as { message: string }).message
+      : "We sent a 6-digit code to your inbox. Enter it below to activate your account.";
 
   useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = window.setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => window.clearTimeout(t);
-  }, [cooldown]);
+    if (queryEmail) setPendingVerifyEmail(queryEmail);
+  }, [queryEmail]);
 
-  const submit = async () => {
-    if (!email || code.length !== 6) {
-      setError("Enter the 6-digit code from your email");
-      return;
+  useEffect(() => {
+    if (!email) {
+      navigate("/register", { replace: true });
     }
-    setLoading(true);
-    setError("");
-    try {
-      const result = await authService.verifyEmail(email, code);
-      setSession(result.user, result.accessToken);
-      navigate("/community", { replace: true });
-    } catch (e) {
-      setError(e instanceof ApiRequestError ? e.message : "Verification failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [email, navigate]);
 
-  const resend = async () => {
-    if (!email || cooldown > 0) return;
-    setResendLoading(true);
-    setError("");
-    try {
-      const r = await authService.resendOtp(email);
-      setMessage(r.message);
-      setCooldown(RESEND_SEC);
-    } catch (e) {
-      setError(e instanceof ApiRequestError ? e.message : "Could not resend code");
-    } finally {
-      setResendLoading(false);
-    }
-  };
+  if (!email) {
+    return null;
+  }
+
+  const from =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "from" in location.state &&
+    typeof (location.state as { from?: { pathname?: string } }).from?.pathname === "string"
+      ? (location.state as { from: { pathname: string } }).from.pathname
+      : "/community";
 
   return (
-    <Box>
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
-        Verify your email
-      </Typography>
-      <Typography variant="body2" sx={{ color: miui.textMuted, mb: 3 }}>
-        We sent a 6-digit code to <strong style={{ color: miui.text }}>{email || "your email"}</strong>
-      </Typography>
-
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
-
-      <Stack spacing={3} sx={{ alignItems: "center" }}>
-        <OtpInput value={code} onChange={setCode} disabled={loading} />
-        <Button variant="contained" fullWidth size="large" disabled={loading} onClick={() => void submit()}>
-          {loading ? "Verifying…" : "Activate account"}
-        </Button>
-        <Button
-          variant="text"
-          disabled={resendLoading || cooldown > 0}
-          onClick={() => void resend()}
-          sx={{ color: miui.textMuted }}
+    <OtpVerificationExperience
+      email={email}
+      title="Check your email"
+      subtitle={registerMessage}
+      verifyLabel="Activate account"
+      initialCooldownSec={DEFAULT_COOLDOWN}
+      onVerify={async (code) => {
+        const result = await authService.verifyEmail(email, code);
+        clearPendingVerifyEmail();
+        setSession(result.user, result.accessToken);
+        window.setTimeout(() => navigate(from, { replace: true }), 600);
+      }}
+      onResend={async () => {
+        const r = await authService.resendOtp(email);
+        startResendCooldown(r.resendCooldownSeconds ?? DEFAULT_COOLDOWN);
+        return r;
+      }}
+      backLink={
+        <RouterLink
+          to="/login"
+          style={{ color: miui.accent, fontWeight: 700, fontSize: "0.8125rem", textAlign: "center" }}
+          onClick={() => clearPendingVerifyEmail()}
         >
-          {cooldown > 0 ? `Resend code in ${cooldown}s` : resendLoading ? "Sending…" : "Resend code"}
-        </Button>
-        <Typography variant="body2" sx={{ textAlign: "center" }}>
-          <RouterLink to="/login" style={{ color: miui.accent, fontWeight: 700 }}>
-            Back to sign in
-          </RouterLink>
-        </Typography>
-      </Stack>
-    </Box>
+          Back to sign in
+        </RouterLink>
+      }
+    />
   );
 }

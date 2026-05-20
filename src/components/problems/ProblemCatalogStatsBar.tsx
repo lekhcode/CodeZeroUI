@@ -7,6 +7,7 @@ type ProblemCatalogStatsBarProps = {
   difficulty: DifficultyLevel[];
   onDifficultyChange: (next: DifficultyLevel[]) => void;
   filteredTotal?: number;
+  compact?: boolean;
 };
 
 export function ProblemCatalogStatsBar(props: ProblemCatalogStatsBarProps) {

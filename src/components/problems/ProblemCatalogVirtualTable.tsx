@@ -1,99 +1,49 @@
 import { useLayoutEffect, type RefObject } from "react";
-import { Box, Typography, alpha } from "@mui/material";
+import { Box } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { ProblemCatalogItem } from "@/types/api.types";
+import { ProblemCatalogListHeader } from "@/components/problems/ProblemCatalogListHeader";
 import {
   ProblemCatalogRow,
   ROW_HEIGHT,
   gridColumns,
 } from "@/components/problems/ProblemCatalogRow";
-import { FadeInCard } from "@/components/ui/FadeInCard";
 import { ProblemCatalogTableChrome } from "@/components/problems/ProblemCatalogTable";
-import { miui } from "@/theme/theme";
-
-function CatalogHeader({ compact }: { compact: boolean }) {
-  const cols = gridColumns(compact);
-  const headerCell = (label: string, align: "left" | "right" = "left") => (
-    <Typography
-      variant="caption"
-      sx={{
-        fontWeight: 800,
-        letterSpacing: "0.06em",
-        textTransform: "uppercase",
-        color: "text.secondary",
-        fontSize: "0.65rem",
-        textAlign: align,
-      }}
-    >
-      {label}
-    </Typography>
-  );
-
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: cols,
-        alignItems: "center",
-        gap: 1.5,
-        px: 2,
-        py: 1.25,
-        bgcolor: alpha(miui.bg, 0.92),
-        borderBottom: `1px solid ${miui.border}`,
-        position: "sticky",
-        top: 0,
-        zIndex: 2,
-      }}
-    >
-      {headerCell("#")}
-      <span />
-      {headerCell("Title")}
-      {headerCell("Level", "right")}
-      {!compact && headerCell("Topics")}
-      <span />
-    </Box>
-  );
-}
+import { PROBLEM_LIST_ROW_HEIGHT } from "@/theme/problemList";
 
 type ProblemCatalogVirtualTableProps = {
   items: ProblemCatalogItem[];
   compact?: boolean;
-  scrollRef: RefObject<HTMLDivElement | null>;
+  flat?: boolean;
+  scrollRef?: RefObject<HTMLDivElement | null>;
 };
 
 export function ProblemCatalogVirtualTable({
   items,
   compact = false,
+  flat = false,
   scrollRef,
 }: ProblemCatalogVirtualTableProps) {
-  const rowHeight = compact ? ROW_HEIGHT.compact : ROW_HEIGHT.full;
+  const rowHeight = PROBLEM_LIST_ROW_HEIGHT;
   const cols = gridColumns(compact);
 
   const virtualizer = useVirtualizer({
     count: items.length,
-    getScrollElement: () => scrollRef.current,
+    getScrollElement: () => scrollRef?.current ?? null,
     estimateSize: () => rowHeight,
-    overscan: 8,
+    overscan: 6,
     getItemKey: (index) => items[index]?.id ?? index,
   });
 
   useLayoutEffect(() => {
     virtualizer.measure();
-    const el = scrollRef.current;
-    if (el === null) {
-      return;
-    }
-    const ro = new ResizeObserver(() => {
-      virtualizer.measure();
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [items.length, virtualizer.measure]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- remeasure when list size changes
+  }, [items.length]);
 
   return (
-    <ProblemCatalogTableChrome>
-      <Box sx={{ bgcolor: miui.paper }}>
-        <CatalogHeader compact={compact} />
+    <ProblemCatalogTableChrome flat={flat}>
+      <Box sx={{ bgcolor: "transparent" }}>
+        <ProblemCatalogListHeader compact={compact} />
         <Box
           sx={{
             height: virtualizer.getTotalSize(),
@@ -114,18 +64,17 @@ export function ProblemCatalogVirtualTable({
                   top: 0,
                   left: 0,
                   width: "100%",
-                  height: rowHeight,
-                  transform: `translateY(${vi.start}px)`,
+                  height: ROW_HEIGHT.compact,
+                  transform: `translate3d(0, ${vi.start}px, 0)`,
                 }}
               >
-                <FadeInCard delay={Math.min(vi.index * 0.04, 0.32)} className="problem-row-wrap">
-                  <ProblemCatalogRow
-                    row={row}
-                    compact={compact}
-                    index={vi.index}
-                    gridColumns={cols}
-                  />
-                </FadeInCard>
+                <ProblemCatalogRow
+                  row={row}
+                  compact={compact}
+                  index={vi.index}
+                  gridColumns={cols}
+                  showDivider={vi.index < items.length - 1}
+                />
               </Box>
             );
           })}

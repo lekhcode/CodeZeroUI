@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import { Alert, Box, Button, Grid, LinearProgress, Stack, Typography } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link as RouterLink } from "react-router-dom";
-import { motion } from "framer-motion";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import TodayRoundedIcon from "@mui/icons-material/TodayRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
@@ -13,9 +13,10 @@ import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { CompactAssignmentRow } from "@/components/learning/CompactAssignmentRow";
 import { BrainCacheCompactRevisionRow } from "@/components/brainCache/BrainCacheCompactRevisionRow";
 import { SubmissionHistoryRow } from "@/components/learning/SubmissionHistoryRow";
-import { SolveProgressRing } from "@/components/learning/SolveProgressRing";
 import { LearningTrendChart } from "@/components/learning/LearningTrendChart";
+import { SolveProgressRing } from "@/components/learning/SolveProgressRing";
 import { learningService } from "@/services/learning.service";
+import { problemsService } from "@/services/problems.service";
 import { insightsService } from "@/services/insights.service";
 import { submissionsService } from "@/services/submissions.service";
 import { schedulesService } from "@/services/schedules.service";
@@ -26,23 +27,8 @@ import { useAuthStore } from "@/store/authStore";
 import { AnimatedBanner } from "@/components/ui/AnimatedBanner";
 import { WeekBelt } from "@/components/dashboard/WeekBelt";
 import { DashboardLeaderboard } from "@/components/dashboard/DashboardLeaderboard";
-import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
-import { FadeInCard } from "@/components/ui/FadeInCard";
 import { dashNavTabSx, miui, miuiCardSx, monoStatSx, sectionContentSx } from "@/theme/theme";
 import dayjs from "dayjs";
-
-const stagger = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.06 },
-  },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
-};
 
 function HeroInlineStat({
   label,
@@ -109,15 +95,37 @@ function HeroInlineStat({
             : {}),
         }}
       >
-        <AnimatedNumber value={value} />
+        {value.toLocaleString()}
       </Typography>
     </Box>
   );
 }
 
+const DASHBOARD_CATALOG_FILTERS = { shuffle: true } as const;
+const DASHBOARD_CATALOG_PAGE_SIZE = 20;
+
 export function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const queryClient = useQueryClient();
   const todayLabel = dayjs().format("dddd, MMM D");
+
+  useEffect(() => {
+    void queryClient.prefetchInfiniteQuery({
+      queryKey: queryKeys.problemCatalog({
+        ...DASHBOARD_CATALOG_FILTERS,
+        infinite: true,
+        pageSize: DASHBOARD_CATALOG_PAGE_SIZE,
+      }),
+      queryFn: () =>
+        problemsService.list({
+          ...DASHBOARD_CATALOG_FILTERS,
+          page: 1,
+          limit: DASHBOARD_CATALOG_PAGE_SIZE,
+        }),
+      initialPageParam: 1,
+      staleTime: 120_000,
+    });
+  }, [queryClient]);
 
   const todayQuery = useQuery({
     queryKey: queryKeys.trackedToday(),
@@ -169,12 +177,12 @@ export function DashboardPage() {
     user?.username ?? user?.fullName?.trim().split(/\s+/)[0] ?? user?.name ?? user?.email?.split("@")[0] ?? "there";
 
   return (
-    <PageContainer sx={{ maxWidth: "100%" }}>
+    <PageContainer className={FLUENT_PAGE.dashboard} sx={{ maxWidth: "100%" }}>
       <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
         <Grid size={{ xs: 12, xl: 9 }}>
-      <motion.div variants={stagger} initial="hidden" animate="show">
-        <motion.div variants={fadeUp}>
+      <Box sx={{ contain: "layout style", minWidth: 0 }}>
           <AnimatedBanner
+            static
             subtle
             sx={{
               mb: 1.5,
@@ -189,9 +197,38 @@ export function DashboardPage() {
               boxShadow: "none",
             }}
           >
-            <Grid container spacing={1.5}>
-              <Grid size={{ xs: 12, md: 8 }}>
-                <Typography sx={{ color: "text.disabled", display: "block", fontSize: "0.6875rem", letterSpacing: "0.04em" }}>
+            <Box sx={{ position: "relative", minWidth: 0 }}>
+              {stats ? (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    zIndex: 1,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <SolveProgressRing
+                    solved={stats.totalSolved}
+                    total={stats.totalProblemsInCatalog}
+                    size={72}
+                    label="Catalog"
+                    animate={false}
+                  />
+                </Box>
+              ) : null}
+
+              <Box sx={{ pr: { xs: stats ? 7.5 : 0, sm: stats ? 9 : 0 }, minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    color: "text.disabled",
+                    display: "block",
+                    fontSize: "0.6875rem",
+                    letterSpacing: "0.04em",
+                  }}
+                >
                   {todayLabel}
                 </Typography>
                 <Typography
@@ -205,7 +242,14 @@ export function DashboardPage() {
                 >
                   Hi {greetingName}
                 </Typography>
-                <Typography sx={{ mt: 0.5, maxWidth: 480, fontSize: "0.8125rem", color: "text.secondary" }}>
+                <Typography
+                  sx={{
+                    mt: 0.5,
+                    maxWidth: { sm: stats ? 420 : 480 },
+                    fontSize: "0.8125rem",
+                    color: "text.secondary",
+                  }}
+                >
                   {progressPct}% of today&apos;s queue done
                   {dueAssignments.length > 0 && ` · ${dueAssignments.length} overdue`}
                 </Typography>
@@ -214,18 +258,16 @@ export function DashboardPage() {
                   value={progressPct}
                   sx={{ mt: 1, height: 3, borderRadius: 0, bgcolor: miui.elevated }}
                 />
-                {stats && (
+
+                {stats ? (
                   <Stack
                     direction="row"
                     sx={{
                       mt: 1.25,
-                      pt: 1,
                       flexWrap: "wrap",
                       rowGap: 0.75,
                       columnGap: 0.5,
                       alignItems: "flex-start",
-                      borderTop: `1px solid ${miui.border}`,
-                      overflow: "hidden",
                     }}
                   >
                     <HeroInlineStat label="Solved today" value={stats.solvedToday} accent={miui.success} />
@@ -239,8 +281,29 @@ export function DashboardPage() {
                     />
                     <HeroInlineStat label="Accepted" value={stats.totalAccepted} accent={miui.text} />
                   </Stack>
+                ) : null}
+
+                {(insightsQuery.data || insightsQuery.isLoading) && (
+                  <Box sx={{ mt: stats ? 0.75 : 1.25, minWidth: 0 }}>
+                    {insightsQuery.isLoading ? (
+                      <Box sx={{ height: 52, display: "flex", alignItems: "flex-end" }}>
+                        <LinearProgress sx={{ width: "100%", height: 2, borderRadius: 0 }} />
+                      </Box>
+                    ) : insightsQuery.isError ? (
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6875rem" }}>
+                        Momentum chart unavailable
+                      </Typography>
+                    ) : insightsQuery.data ? (
+                      <LearningTrendChart insights={insightsQuery.data} embedded interactive={false} />
+                    ) : null}
+                  </Box>
                 )}
-                <Stack direction="row" spacing={0.5} sx={{ mt: 1.25, flexWrap: "wrap", borderBottom: `1px solid ${miui.border}` }}>
+
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  sx={{ mt: 1.25, flexWrap: "wrap", borderBottom: `1px solid ${miui.border}` }}
+                >
                   <Button
                     component={RouterLink}
                     to="/today"
@@ -272,23 +335,9 @@ export function DashboardPage() {
                     Submissions
                   </Button>
                 </Stack>
-              </Grid>
-              {stats && (
-                <Grid
-                  size={{ xs: 12, md: 4 }}
-                  sx={{ display: "flex", justifyContent: { md: "flex-end" }, alignItems: "center" }}
-                >
-                  <SolveProgressRing
-                    solved={stats.totalSolved}
-                    total={stats.totalProblemsInCatalog}
-                    size={80}
-                    label="Catalog"
-                  />
-                </Grid>
-              )}
-            </Grid>
+              </Box>
+            </Box>
           </AnimatedBanner>
-        </motion.div>
 
         {todayQuery.isLoading ? (
           <LoadingSkeleton variant="detail" />
@@ -300,40 +349,25 @@ export function DashboardPage() {
               </Alert>
             )}
 
-            <motion.div variants={fadeUp}>
+            <Box sx={{ contentVisibility: "auto", containIntrinsicSize: "auto 220px" }}>
               <WeekBelt />
-            </motion.div>
+            </Box>
 
-            <motion.div variants={fadeUp}>
-              <Box sx={{ mb: 2 }}>
-                {insightsQuery.isLoading ? (
-                  <LoadingSkeleton variant="detail" />
-                ) : insightsQuery.isError ? (
-                  <Alert severity="warning" sx={{ borderRadius: 2 }}>
-                    Could not load momentum chart. Restart backend and refresh.
-                  </Alert>
-                ) : insightsQuery.data ? (
-                  <LearningTrendChart insights={insightsQuery.data} />
-                ) : null}
-              </Box>
-            </motion.div>
-
-            <motion.div variants={fadeUp}>
-              <Panel title="Problem library" actionLabel="Open Lab" actionTo="/lab" sx={{ mb: 2 }}>
+            <Panel title="Problem library" actionLabel="Open Lab" actionTo="/lab" flat sx={{ mb: 2 }}>
                 <ProblemCatalogInfiniteList
-                  filters={{ shuffle: true }}
-                  pageSize={20}
+                  filters={DASHBOARD_CATALOG_FILTERS}
+                  pageSize={DASHBOARD_CATALOG_PAGE_SIZE}
                   compact
-                  maxHeight={380}
+                  flat
+                  preview
                   virtualized={false}
+                  scrollContained={false}
                   enableLoadMore={false}
                 />
               </Panel>
-            </motion.div>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{ contentVisibility: "auto" }}>
               <Grid size={{ xs: 12, lg: 7 }}>
-                <motion.div variants={fadeUp}>
                   <Panel title="Pending today" actionLabel="Open" actionTo="/today" count={pendingToday.length}>
                     {pendingToday.length === 0 ? (
                       <Typography variant="body2" color="text.secondary" sx={{ ...sectionContentSx, py: 2 }}>
@@ -349,9 +383,7 @@ export function DashboardPage() {
                       ))
                     )}
                   </Panel>
-                </motion.div>
 
-                <motion.div variants={fadeUp}>
                   <Panel
                     title="Overdue"
                     actionLabel="Resume"
@@ -373,10 +405,8 @@ export function DashboardPage() {
                       ))
                     )}
                   </Panel>
-                </motion.div>
 
                 {(brainDueToday.length > 0 || brainOverdue.length > 0) && (
-                  <motion.div variants={fadeUp}>
                     <Panel
                       title="Brain Cache"
                       actionLabel="Open"
@@ -399,12 +429,10 @@ export function DashboardPage() {
                         />
                       ))}
                     </Panel>
-                  </motion.div>
                 )}
               </Grid>
 
               <Grid size={{ xs: 12, lg: 5 }}>
-                <motion.div variants={fadeUp}>
                   <Panel
                     title="Recent submissions"
                     actionLabel="All"
@@ -418,18 +446,15 @@ export function DashboardPage() {
                       </Typography>
                     ) : (
                       recentSubmissions.map((s, i) => (
-                        <FadeInCard key={s.id} delay={Math.min(i * 0.04, 0.32)}>
-                          <SubmissionHistoryRow
-                            submission={s}
-                            isLast={i === recentSubmissions.length - 1}
-                          />
-                        </FadeInCard>
+                        <SubmissionHistoryRow
+                          key={s.id}
+                          submission={s}
+                          isLast={i === recentSubmissions.length - 1}
+                        />
                       ))
                     )}
                   </Panel>
-                </motion.div>
 
-                <motion.div variants={fadeUp}>
                   <Box sx={{ ...miuiCardSx, ...sectionContentSx, mt: 2, borderRadius: 2.5 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
                       Schedules
@@ -447,12 +472,11 @@ export function DashboardPage() {
                       Explore
                     </Button>
                   </Box>
-                </motion.div>
               </Grid>
             </Grid>
           </>
         )}
-      </motion.div>
+      </Box>
         </Grid>
 
         <Grid size={{ xs: 12, xl: 3 }} sx={{ display: "flex", minWidth: 0 }}>
@@ -469,6 +493,7 @@ function Panel({
   actionTo,
   count,
   children,
+  flat = false,
   sx,
 }: {
   title: string;
@@ -476,11 +501,30 @@ function Panel({
   actionTo: string;
   count?: number;
   children: ReactNode;
+  /** Borderless section — e.g. problem library list */
+  flat?: boolean;
   sx?: object;
 }) {
   return (
     <SectionCard
-      sx={{ borderRadius: 2.5, ...sx }}
+      sx={{
+        ...(flat
+          ? {
+              borderRadius: 0,
+              border: "none",
+              boxShadow: "none",
+              bgcolor: "transparent",
+              backgroundImage: "none",
+            }
+          : { borderRadius: 2.5 }),
+        ...sx,
+      }}
+      headerSx={
+        flat
+          ? { px: 0, py: 0.75, borderBottom: `1px solid ${miui.border}` }
+          : undefined
+      }
+      bodySx={flat ? { px: 0, pt: 0.75, pb: 0 } : undefined}
       title={title}
       titleAdornment={
         count !== undefined ? (

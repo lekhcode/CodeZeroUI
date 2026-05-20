@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FixedPageShell, ScrollRegion } from "@/components/layout/FixedPageShell";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { FadeInCard } from "@/components/ui/FadeInCard";
@@ -582,7 +583,7 @@ export function CommunityPostPage() {
         mx: 0,
       }}
     >
-      <ScrollRegion sx={{ px: 0 }}>
+      <ScrollRegion pageClass={FLUENT_PAGE.community} sx={{ px: 0 }}>
         {postQuery.isLoading && (
           <div className={styles.page}>
             <LoadingSkeleton count={3} />

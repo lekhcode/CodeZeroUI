@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
 type FadeInCardProps = {
@@ -9,6 +8,10 @@ type FadeInCardProps = {
   borderRadius?: number | string;
 };
 
+/**
+ * Lightweight enter fade — opacity only (no translate) for scroll performance.
+ * Visual: subtle appear, same card content.
+ */
 export function FadeInCard({ children, delay = 0, className, borderRadius }: FadeInCardProps) {
   const radius =
     borderRadius !== undefined
@@ -18,22 +21,15 @@ export function FadeInCard({ children, delay = 0, className, borderRadius }: Fad
       : undefined;
 
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.28,
-        delay,
-        ease: [0.4, 0, 0.2, 1],
+    <div
+      className={className ? `fade-in-card ${className}` : "fade-in-card"}
+      style={{
+        animationDelay: `${delay}s`,
+        borderRadius: radius,
+        overflow: radius !== undefined ? "hidden" : undefined,
       }}
-      style={
-        radius !== undefined
-          ? { borderRadius: radius, overflow: "hidden" }
-          : undefined
-      }
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

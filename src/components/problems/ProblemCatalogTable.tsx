@@ -238,7 +238,18 @@ export function ProblemCatalogTable({ items, compact = false }: ProblemCatalogTa
   );
 }
 
-export function ProblemCatalogTableChrome({ children }: { children: ReactNode }) {
+export function ProblemCatalogTableChrome({
+  children,
+  flat = false,
+}: {
+  children: ReactNode;
+  /** Lab / explore-style list — no card chrome */
+  flat?: boolean;
+}) {
+  if (flat) {
+    return <Box sx={{ overflow: "hidden" }}>{children}</Box>;
+  }
+
   return (
     <Box
       sx={{

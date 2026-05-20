@@ -1,21 +1,34 @@
 import { memo } from "react";
-import { Box, Chip, Typography, alpha } from "@mui/material";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import { Box, Typography } from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Link as RouterLink } from "react-router-dom";
 import type { ProblemCatalogItem } from "@/types/api.types";
 import { ProblemSolvedIndicator } from "@/components/problems/ProblemSolvedIndicator";
-import { DifficultyChip } from "@/components/ui/DifficultyChip";
-import { difficultyColor } from "@/utils/difficulty";
+import { DifficultyIndicator } from "@/modules/explore/topic-preview/DifficultyIndicator";
+import {
+  PROBLEM_LIST_ROW_HEIGHT,
+  problemListDividerSx,
+  problemListIndexSx,
+  problemListLinkRowSx,
+  problemListMetaSx,
+  problemListTitleSx,
+  problemListTokens,
+} from "@/theme/problemList";
 import { miui } from "@/theme/theme";
 
-export const ROW_HEIGHT = { compact: 52, full: 58 } as const;
+export const ROW_HEIGHT = {
+  compact: PROBLEM_LIST_ROW_HEIGHT,
+  full: PROBLEM_LIST_ROW_HEIGHT,
+} as const;
 
 type ProblemCatalogRowProps = {
   row: ProblemCatalogItem;
   compact: boolean;
   index: number;
   gridColumns: string;
+  /** @deprecated Style is unified; kept for call-site compat */
+  flat?: boolean;
+  showDivider?: boolean;
 };
 
 export const ProblemCatalogRow = memo(function ProblemCatalogRow({
@@ -23,130 +36,78 @@ export const ProblemCatalogRow = memo(function ProblemCatalogRow({
   compact,
   index: _index,
   gridColumns,
+  showDivider = true,
 }: ProblemCatalogRowProps) {
-  const accent = difficultyColor(row.difficulty);
   return (
-    <Box
-      sx={{
-        borderBottom: `1px solid ${miui.border}`,
-        bgcolor: "transparent",
-      }}
-    >
+    <Box sx={problemListDividerSx(showDivider)}>
       <Box
         component={RouterLink}
         to={`/problems/${row.slug}`}
         className="problem-row"
-        sx={{
+        sx={problemListLinkRowSx({
           display: "grid",
           gridTemplateColumns: gridColumns,
           alignItems: "center",
-          gap: 1.5,
-          px: 2,
-          py: compact ? 1 : 1.35,
-          minHeight: compact ? ROW_HEIGHT.compact : ROW_HEIGHT.full,
-          textDecoration: "none",
-          color: "inherit",
+          gap: problemListTokens.rowGap,
+          px: problemListTokens.rowPx,
+          py: problemListTokens.rowPy,
+          minHeight: PROBLEM_LIST_ROW_HEIGHT,
+          boxSizing: "border-box",
           position: "relative",
-          bgcolor: "transparent",
-          "&:hover": {
-            bgcolor: miui.hover,
-            "& .catalog-chevron": { opacity: 1, transform: "translateX(2px)" },
-            "& .catalog-title": { color: "primary.main" },
-          },
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            left: 0,
-            top: 6,
-            bottom: 6,
-            width: 3,
-            borderRadius: 2,
-            bgcolor: accent,
-            opacity: 0,
-            transition: "opacity 0.15s ease",
-          },
-          "&:hover::before": { opacity: 1 },
-        }}
+        })}
       >
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 700,
-            color: "text.secondary",
-            fontVariantNumeric: "tabular-nums",
-            fontSize: "0.8rem",
-          }}
-        >
-          {row.leetcodeId}
-        </Typography>
+        <Typography sx={problemListIndexSx()}>{row.leetcodeId}</Typography>
 
         <ProblemSolvedIndicator solved={row.solved} />
 
         <Box sx={{ minWidth: 0 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
-            <Typography
-              className="catalog-title"
-              variant="body2"
-              sx={{
-                fontWeight: 650,
-                lineHeight: 1.35,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <Typography className="catalog-title" sx={problemListTitleSx()}>
               {row.title}
             </Typography>
-            {row.isPremium && (
-              <Chip
-                icon={<LockRoundedIcon sx={{ fontSize: "14px !important" }} />}
-                label="Premium"
-                size="small"
+            {row.isPremium ? (
+              <Box
                 sx={{
-                  height: 22,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.25,
                   flexShrink: 0,
-                  fontSize: "0.65rem",
-                  fontWeight: 700,
-                  bgcolor: alpha("#f59e0b", 0.12),
-                  color: "#b45309",
+                  color: miui.caution,
+                  fontSize: problemListTokens.metaSize,
+                  fontWeight: problemListTokens.metaWeight,
                 }}
-              />
-            )}
+              >
+                <LockOutlinedIcon sx={{ fontSize: 12 }} />
+                <Typography component="span" sx={{ fontSize: "inherit", fontWeight: "inherit" }}>
+                  Pro
+                </Typography>
+              </Box>
+            ) : null}
           </Box>
-          {compact && row.topics.length > 0 && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              sx={{ display: "block", mt: 0.25, fontSize: "0.68rem" }}
-            >
+          {compact && row.topics.length > 0 ? (
+            <Typography noWrap sx={problemListMetaSx({ display: "block", mt: 0.25 })}>
               {row.topics.slice(0, 3).join(" · ")}
             </Typography>
-          )}
+          ) : null}
         </Box>
 
         <Box sx={{ justifySelf: "end" }}>
-          <DifficultyChip difficulty={row.difficulty} />
+          <DifficultyIndicator difficulty={row.difficulty} />
         </Box>
 
-        {!compact && (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, minWidth: 0 }}>
-            {row.topics.slice(0, 3).map((t) => (
-              <Chip
-                key={t}
-                label={t}
-                size="small"
-                variant="outlined"
-                sx={{ height: 24, fontSize: "0.68rem", fontWeight: 600 }}
-              />
-            ))}
-          </Box>
-        )}
+        {!compact ? (
+          <Typography
+            noWrap
+            sx={problemListMetaSx({
+              minWidth: 0,
+              display: { xs: "none", md: "block" },
+            })}
+          >
+            {row.topics.slice(0, 3).join(" · ") || "—"}
+          </Typography>
+        ) : null}
 
-        <ChevronRightRoundedIcon
-          className="catalog-chevron"
-          sx={{ fontSize: 20, color: "text.secondary", opacity: 0.35, justifySelf: "end" }}
-        />
+        <span />
       </Box>
     </Box>
   );
@@ -154,6 +115,6 @@ export const ProblemCatalogRow = memo(function ProblemCatalogRow({
 
 export function gridColumns(compact: boolean): string {
   return compact
-    ? "52px 22px minmax(0, 1fr) 96px 20px"
-    : "52px 22px minmax(0, 1fr) 108px minmax(120px, 1.2fr) 20px";
+    ? "52px 22px minmax(0, 1fr) 72px 20px"
+    : "52px 22px minmax(0, 1fr) 72px minmax(100px, 1.2fr) 20px";
 }

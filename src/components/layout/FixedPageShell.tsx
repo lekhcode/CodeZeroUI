@@ -1,5 +1,6 @@
 import { Box, type SxProps, type Theme } from "@mui/material";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
+import { useFluentScroll } from "@/hooks/useFluentScroll";
 
 /** Fills the main outlet without page-level scroll (inner regions scroll instead). */
 export function FixedPageShell({
@@ -35,13 +36,23 @@ export function FixedPageShell({
 export function ScrollRegion({
   children,
   sx,
+  pageClass,
+  scrollRef: scrollRefProp,
 }: {
   children: ReactNode;
   sx?: SxProps<Theme>;
+  /** e.g. FLUENT_PAGE.today — enables scroll perf helpers */
+  pageClass?: string;
+  /** Expose the scroll root for virtualized lists / infinite scroll on the same container */
+  scrollRef?: RefObject<HTMLDivElement | null>;
 }) {
+  const scrollRef = useFluentScroll(scrollRefProp);
+  const className = ["app-scroll", pageClass].filter(Boolean).join(" ");
+
   return (
     <Box
-      className="app-scroll"
+      ref={scrollRef}
+      className={className}
       sx={{
         flex: 1,
         minHeight: 0,

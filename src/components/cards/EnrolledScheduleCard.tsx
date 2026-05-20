@@ -1,6 +1,7 @@
 import { Card, CardContent, Chip, Stack, Typography, alpha } from "@mui/material";
-import { motion } from "framer-motion";
+import { FadeInCard } from "@/components/ui/FadeInCard";
 import type { UserSchedule } from "@/types/api.types";
+import { formatScheduleDifficultyLabel } from "@/utils/scheduleDifficulty";
 
 type EnrolledScheduleCardProps = {
   schedule: UserSchedule;
@@ -8,13 +9,13 @@ type EnrolledScheduleCardProps = {
 };
 
 export function EnrolledScheduleCard({ schedule, index = 0 }: EnrolledScheduleCardProps) {
+  const diffLabel = formatScheduleDifficultyLabel(
+    schedule.difficulty,
+    schedule.difficultyFilters,
+  );
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
-      whileHover={{ y: -3 }}
-    >
+    <FadeInCard delay={index * 0.04} className="card-hover-lift-3">
       <Card sx={{ height: "100%" }}>
         <CardContent>
           <Stack spacing={1}>
@@ -26,9 +27,7 @@ export function EnrolledScheduleCard({ schedule, index = 0 }: EnrolledScheduleCa
               {schedule.dailyQuestions !== null && (
                 <Chip label={`${schedule.dailyQuestions}/day`} size="small" variant="outlined" />
               )}
-              {schedule.difficulty !== null && (
-                <Chip label={schedule.difficulty} size="small" variant="outlined" />
-              )}
+              {diffLabel ? <Chip label={diffLabel} size="small" variant="outlined" /> : null}
               <Chip
                 label={schedule.active ? "Active" : "Paused"}
                 size="small"
@@ -42,6 +41,6 @@ export function EnrolledScheduleCard({ schedule, index = 0 }: EnrolledScheduleCa
           </Stack>
         </CardContent>
       </Card>
-    </motion.div>
+    </FadeInCard>
   );
 }

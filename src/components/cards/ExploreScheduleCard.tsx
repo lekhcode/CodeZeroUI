@@ -26,15 +26,35 @@ type ExploreScheduleCardProps = {
   template: ScheduleTemplate;
   enrolled?: boolean;
   onEnroll?: () => void;
+  /** Topic / study plan — open curriculum preview */
+  onPreview?: () => void;
 };
 
-export function ExploreScheduleCard({ template, enrolled, onEnroll }: ExploreScheduleCardProps) {
+export function ExploreScheduleCard({
+  template,
+  enrolled,
+  onEnroll,
+  onPreview,
+}: ExploreScheduleCardProps) {
   const meta = getTemplateMeta(template.slug, template.type);
   const Icon = TYPE_ICONS[template.type];
   const [gradStart, gradEnd] = meta.gradient;
+  const previewable =
+    (template.type === "TOPIC" || template.type === "STUDY_PLAN") && onPreview !== undefined;
+  const previewHint =
+    template.type === "STUDY_PLAN"
+      ? "Click card to preview plan"
+      : template.type === "TOPIC"
+        ? "Click card to preview questions"
+        : null;
+
+  const handleCardClick = (): void => {
+    if (previewable) onPreview();
+  };
 
   return (
     <Card
+      onClick={previewable ? handleCardClick : undefined}
       sx={{
         height: "100%",
         display: "flex",
@@ -42,11 +62,16 @@ export function ExploreScheduleCard({ template, enrolled, onEnroll }: ExploreSch
         bgcolor: miui.paper,
         borderRadius: "12px",
         overflow: "hidden",
-        transition: "border-color 200ms ease, transform 200ms ease",
+        transition: "border-color 160ms ease, transform 160ms ease",
+        willChange: previewable ? "transform" : undefined,
         boxShadow: "none",
         border: `1px solid ${miui.border}`,
+        cursor: previewable ? "pointer" : "default",
         "@media (prefers-reduced-motion: no-preference)": {
-          "&:hover": { transform: "translateY(-2px)", borderColor: miui.borderStrong },
+          "&:hover": {
+            transform: "translateY(-2px)",
+            borderColor: miui.borderStrong,
+          },
         },
       }}
     >
@@ -148,7 +173,7 @@ export function ExploreScheduleCard({ template, enrolled, onEnroll }: ExploreSch
         {template.allowsCount && (
           <Box sx={{ mb: 2 }}>
             <Typography variant="caption" sx={{ color: miui.textMuted, fontWeight: 400 }}>
-              Default pace: {template.defaultCount ?? 2} problems / day
+              Default pace: {template.defaultCount ?? 2} problems / day (up to 6)
             </Typography>
             <LinearProgress
               variant="determinate"
@@ -163,11 +188,27 @@ export function ExploreScheduleCard({ template, enrolled, onEnroll }: ExploreSch
           </Box>
         )}
 
+        {previewHint ? (
+          <Typography
+            sx={{
+              fontSize: "11px",
+              color: miui.textDim,
+              mb: 1,
+              fontWeight: 400,
+            }}
+          >
+            {previewHint}
+          </Typography>
+        ) : null}
+
         <Button
           variant={enrolled ? "outlined" : "contained"}
           fullWidth
           disabled={enrolled}
-          onClick={onEnroll}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEnroll?.();
+          }}
           startIcon={enrolled ? <CheckCircleRoundedIcon /> : undefined}
           sx={
             enrolled

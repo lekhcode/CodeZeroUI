@@ -21,12 +21,15 @@ import { OtpInput } from "@/components/auth/OtpInput";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { authService } from "@/services/auth.service";
 import { usersService } from "@/services/users.service";
+import { Link as RouterLink } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
+import { getAuthErrorMessage } from "@/utils/authErrors";
 import { useLogout } from "@/hooks/useAuth";
 import { validatePassword, isValidUsernameFormat, normalizeUsername } from "@/utils/passwordPolicy";
+import { PageContainer } from "@/components/ui/PageContainer";
+import { FLUENT_PAGE } from "@/theme/fluentScroll";
 import { miui } from "@/theme/theme";
 import { queryKeys } from "@/hooks/queryKeys";
-import { ApiRequestError } from "@/services/api";
 import type { PublicUser } from "@/types/api.types";
 import dayjs from "dayjs";
 
@@ -158,7 +161,18 @@ function ProfileSection() {
                 sx={{ height: 22, bgcolor: miui.successSoft, color: miui.success, borderRadius: 0 }}
               />
             ) : (
-              <Chip label="Unverified" size="small" color="warning" sx={{ height: 22, borderRadius: 0 }} />
+              <>
+                <Chip label="Unverified" size="small" color="warning" sx={{ height: 22, borderRadius: 0 }} />
+                <Button
+                  component={RouterLink}
+                  to={`/verify-email?email=${encodeURIComponent(user.email)}`}
+                  size="small"
+                  variant="outlined"
+                  sx={{ borderRadius: 0, textTransform: "none", fontSize: "0.75rem" }}
+                >
+                  Verify email
+                </Button>
+              </>
             )}
           </Stack>
           <Typography sx={{ fontSize: "0.75rem", color: miui.textDim }}>
@@ -274,7 +288,7 @@ function SecuritySection() {
       setMessage(r.message);
       setStep("otp");
     } catch (e) {
-      setError(e instanceof ApiRequestError ? e.message : "Failed");
+      setError(getAuthErrorMessage(e, "Failed to send code"));
     }
   };
 
@@ -297,7 +311,7 @@ function SecuritySection() {
       setPassword("");
       setConfirm("");
     } catch (e) {
-      setError(e instanceof ApiRequestError ? e.message : "Failed");
+      setError(getAuthErrorMessage(e, "Failed to update password"));
     }
   };
 
@@ -315,7 +329,16 @@ function SecuritySection() {
         )}
         {step === "otp" && (
           <>
-            <OtpInput value={code} onChange={setCode} />
+            <Typography
+              variant="caption"
+              sx={{ fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: miui.textDim }}
+            >
+              Verification code
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Enter the 6-digit code we emailed you to confirm this password change.
+            </Typography>
+            <OtpInput idPrefix="settings-otp" value={code} onChange={setCode} />
             <Button
               variant="contained"
               onClick={() => setStep("password")}
@@ -418,7 +441,7 @@ export function SettingsPage() {
   const [tab, setTab] = useState(0);
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto", py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+    <PageContainer className={FLUENT_PAGE.settings} sx={{ maxWidth: 800 }}>
       <Typography sx={{ fontWeight: 800, fontSize: "1.5rem", color: miui.text, mb: 0.5 }}>
         Settings
       </Typography>
@@ -443,6 +466,6 @@ export function SettingsPage() {
           </Typography>
         )}
       </Box>
-    </Box>
+    </PageContainer>
   );
 }

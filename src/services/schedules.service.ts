@@ -1,12 +1,20 @@
 import type {
   CreateUserScheduleInput,
   ScheduleTemplate,
+  TemplatePreviewPayload,
   UserSchedule,
 } from "@/types/api.types";
 import { api, unwrap } from "./api";
 
 /** Backend wraps list payloads — unwrap to typed arrays/objects for React Query. */
 export const schedulesService = {
+  async getTemplatePreview(slug: string): Promise<TemplatePreviewPayload> {
+    const payload = await unwrap<{ preview: TemplatePreviewPayload }>(
+      api.get(`/api/v1/schedule-templates/${encodeURIComponent(slug)}/preview`),
+    );
+    return payload.preview;
+  },
+
   async listTemplates(): Promise<ScheduleTemplate[]> {
     const payload = await unwrap<{ templates: ScheduleTemplate[] }>(
       api.get("/api/v1/schedule-templates"),

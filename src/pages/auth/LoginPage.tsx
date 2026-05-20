@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { ApiRequestError } from "@/services/api";
+import { getAuthErrorMessage } from "@/utils/authErrors";
+import {
+  setPendingVerifyEmail,
+  startResendCooldown,
+} from "@/utils/pendingVerification";
 import { AppCopyright } from "@/components/layout/AppCopyright";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
@@ -57,6 +62,7 @@ export function LoginPage() {
 
 function LoginPageInner() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -251,24 +257,37 @@ function LoginPageInner() {
     setLoading(true);
     setError("");
     try {
+      const normalizedEmail = email.trim().toLowerCase();
+
       if (mode === "signup") {
-        await authService.register(email.trim().toLowerCase(), password);
-        navigate(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`, {
+        const reg = await authService.register(normalizedEmail, password);
+        setPendingVerifyEmail(normalizedEmail);
+        startResendCooldown(reg.resendCooldownSeconds ?? 60);
+        navigate(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`, {
           replace: true,
+          state: { message: reg.message },
         });
         return;
       }
-      const data = await authService.login(email.trim().toLowerCase(), password);
+      const data = await authService.login(normalizedEmail, password);
       setSession(data.user, data.accessToken);
-      navigate("/community", { replace: true });
+      const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+      const dest =
+        from && from !== "/login" && !from.startsWith("/verify-email") ? from : "/community";
+      navigate(dest, { replace: true });
     } catch (err) {
       if (err instanceof ApiRequestError && err.code === "EMAIL_NOT_VERIFIED") {
+        setPendingVerifyEmail(email.trim().toLowerCase());
         navigate(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`, {
           replace: true,
+          state: {
+            message:
+              "Verify your email before signing in. Enter the code we sent you, or request a new one.",
+          },
         });
         return;
       }
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setError(getAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -321,7 +340,9 @@ function LoginPageInner() {
 
           <div className="login-divider">
             <div className="login-divider__line" />
-            <span className="login-divider__label">or sign in with email</span>
+            <span className="login-divider__label">
+              {mode === "signin" ? "or sign in with email" : "or sign up with email"}
+            </span>
             <div className="login-divider__line" />
           </div>
 

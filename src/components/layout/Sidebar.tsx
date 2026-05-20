@@ -34,12 +34,12 @@ const DRAWER_COLLAPSED = 60;
 const NAV = [
   { to: "/community", label: "Community", icon: <ForumRoundedIcon /> },
   { to: "/dashboard", label: "Dashboard", icon: <DashboardRoundedIcon /> },
-  { to: "/lab", label: "Lab", icon: <CodeRoundedIcon /> },
   { to: "/today", label: "Today", icon: <TodayRoundedIcon /> },
-  { to: "/brain-cache", label: "Brain Cache", icon: <PsychologyRoundedIcon /> },
+  { to: "/lab", label: "Lab", icon: <CodeRoundedIcon /> },
   { to: "/submissions", label: "Submissions", icon: <HistoryRoundedIcon /> },
-  { to: "/templates", label: "Explore", icon: <ExploreRoundedIcon /> },
+  { to: "/brain-cache", label: "Brain Cache", icon: <PsychologyRoundedIcon /> },
   { to: "/schedules", label: "My schedules", icon: <EventNoteRoundedIcon /> },
+  { to: "/templates", label: "Explore", icon: <ExploreRoundedIcon /> },
   { to: "/settings", label: "Settings", icon: <SettingsRoundedIcon /> },
 ];
 

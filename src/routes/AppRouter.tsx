@@ -1,26 +1,35 @@
+import { Suspense, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { AppLayout } from "@/layouts/AppLayout";
+import { LazyRouteFallback } from "@/components/ui/LazyRouteFallback";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
+import { GuestRoute } from "@/routes/GuestRoute";
+import {
+  BrainCachePage,
+  CommunityBrowsePage,
+  CommunityCreatePostPage,
+  CommunityHubPage,
+  CommunityPostPage,
+  DashboardPage,
+  LabPage,
+  ProblemDetailPage,
+  SettingsPage,
+  SubmissionsPage,
+  TemplatesPage,
+  TodayPage,
+  UserSchedulesPage,
+} from "@/routes/lazyPages";
 import { GitHubCallbackPage } from "@/pages/auth/GitHubCallbackPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { RegisterPage } from "@/pages/auth/RegisterPage";
 import { VerifyEmailPage } from "@/pages/auth/VerifyEmailPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
-import { SettingsPage } from "@/pages/settings/SettingsPage";
-import { DashboardPage } from "@/pages/dashboard/DashboardPage";
-import { LabPage } from "@/pages/lab/LabPage";
-import { TodayPage } from "@/pages/today/TodayPage";
-import { SubmissionsPage } from "@/pages/submissions/SubmissionsPage";
-import { TemplatesPage } from "@/pages/templates/TemplatesPage";
-import { UserSchedulesPage } from "@/pages/schedules/UserSchedulesPage";
-import { ProblemDetailPage } from "@/pages/problems/ProblemDetailPage";
-import { BrainCachePage } from "@/pages/brainCache/BrainCachePage";
-import { CommunityHubPage } from "@/pages/community/CommunityHubPage";
-import { CommunityBrowsePage } from "@/pages/community/CommunityBrowsePage";
-import { CommunityCreatePostPage } from "@/pages/community/CommunityCreatePostPage";
-import { CommunityPostPage } from "@/pages/community/CommunityPostPage";
+
+function Lazy({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<LazyRouteFallback />}>{children}</Suspense>;
+}
 
 export function AppRouter() {
   return (
@@ -29,31 +38,123 @@ export function AppRouter() {
         <Route path="/auth/github/callback" element={<GitHubCallbackPage />} />
         <Route path="/auth/github/success" element={<GitHubCallbackPage />} />
 
-        {/* Login uses its own full-viewport layout — must not sit inside AuthLayout (transform breaks position:fixed). */}
         <Route path="/login" element={<LoginPage />} />
 
-        <Route element={<AuthLayout />}>
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route element={<GuestRoute />}>
+          <Route element={<AuthLayout />}>
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+          </Route>
         </Route>
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/lab" element={<LabPage />} />
-            <Route path="/today" element={<TodayPage />} />
-            <Route path="/submissions" element={<SubmissionsPage />} />
-            <Route path="/templates" element={<TemplatesPage />} />
-            <Route path="/schedules" element={<UserSchedulesPage />} />
-            <Route path="/brain-cache" element={<BrainCachePage />} />
-            <Route path="/community" element={<CommunityHubPage />} />
-            <Route path="/community/browse" element={<CommunityBrowsePage />} />
-            <Route path="/community/new" element={<CommunityCreatePostPage />} />
-            <Route path="/community/posts/:id" element={<CommunityPostPage />} />
-            <Route path="/problems/:slug" element={<ProblemDetailPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <Lazy>
+                  <DashboardPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/lab"
+              element={
+                <Lazy>
+                  <LabPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/today"
+              element={
+                <Lazy>
+                  <TodayPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/submissions"
+              element={
+                <Lazy>
+                  <SubmissionsPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/templates"
+              element={
+                <Lazy>
+                  <TemplatesPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/schedules"
+              element={
+                <Lazy>
+                  <UserSchedulesPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/brain-cache"
+              element={
+                <Lazy>
+                  <BrainCachePage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/community"
+              element={
+                <Lazy>
+                  <CommunityHubPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/community/browse"
+              element={
+                <Lazy>
+                  <CommunityBrowsePage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/community/new"
+              element={
+                <Lazy>
+                  <CommunityCreatePostPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/community/posts/:id"
+              element={
+                <Lazy>
+                  <CommunityPostPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/problems/:slug"
+              element={
+                <Lazy>
+                  <ProblemDetailPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <Lazy>
+                  <SettingsPage />
+                </Lazy>
+              }
+            />
           </Route>
         </Route>
 

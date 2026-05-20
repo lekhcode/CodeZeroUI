@@ -11,7 +11,14 @@ import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import { Link as RouterLink } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { BrainCachePlaylist } from "@/types/brainCache.types";
-import { DifficultyChip } from "@/components/ui/DifficultyChip";
+import { DifficultyIndicator } from "@/modules/explore/topic-preview/DifficultyIndicator";
+import {
+  problemListDividerSx,
+  problemListLinkRowSx,
+  problemListMetaSx,
+  problemListTitleSx,
+  problemListTokens,
+} from "@/theme/problemList";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { brainCacheService } from "@/services/brainCache.service";
 import { brainCacheKeyPrefix, queryKeys } from "@/hooks/queryKeys";
@@ -61,27 +68,24 @@ export function BrainCachePlaylistProblemsList({ playlist }: BrainCachePlaylistP
           key={entry.playlistProblemId}
           component={RouterLink}
           to={`/problems/${entry.problem.slug}`}
-          sx={{
+          sx={problemListLinkRowSx({
             display: "flex",
             alignItems: "center",
-            gap: 1.25,
+            gap: problemListTokens.rowGap,
             px: sectionInsetX,
-            py: 1.15,
-            minHeight: 52,
-            textDecoration: "none",
-            color: "inherit",
-            borderBottom: i < problems.length - 1 ? `1px solid ${miui.border}` : "none",
-            "&:hover": { bgcolor: alpha(miui.primary, 0.04) },
-          }}
+            py: problemListTokens.rowPy,
+            minHeight: problemListTokens.rowMinHeight,
+            ...problemListDividerSx(i < problems.length - 1),
+          })}
         >
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
+              <Typography noWrap sx={{ ...problemListTitleSx(), flex: 1, minWidth: 0 }}>
                 {entry.problem.title}
               </Typography>
-              <DifficultyChip difficulty={entry.problem.difficulty} />
+              <DifficultyIndicator difficulty={entry.problem.difficulty} />
             </Box>
-            <Typography variant="caption" color="text.secondary">
+            <Typography sx={problemListMetaSx({ display: "block", mt: 0.2 })}>
               {entry.nextDueDate !== null
                 ? `Next revision: ${formatOverdueDayLabel(entry.nextDueDate, todayKey)}`
                 : "On interval schedule"}

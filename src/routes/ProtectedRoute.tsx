@@ -34,6 +34,16 @@ export function ProtectedRoute() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  if (user && !user.isEmailVerified) {
+    return (
+      <Navigate
+        to={`/verify-email?email=${encodeURIComponent(user.email)}`}
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
+
   if (isLoading && user === null) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>

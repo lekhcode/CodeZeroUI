@@ -74,17 +74,16 @@ header,
     pointer-events: none;
   }
 
-  /* ── Problem rows ── */
+  /* ── Problem rows (transform-free — see theme/problemList.ts) ── */
   .problem-row {
-    transition:
-      background 120ms ease,
-      transform 120ms ease;
+    transition: background-color 120ms ease;
     cursor: pointer;
   }
 
-  .problem-row:hover {
-    background: var(--bg-hover);
-    transform: translateX(4px);
+  @media (hover: hover) {
+    .problem-row:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
   }
 
   /* ── Primary / solve buttons ── */

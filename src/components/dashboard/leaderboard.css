@@ -73,6 +73,10 @@
   animation: lb-float 3s ease-in-out infinite;
 }
 
+.fluent-scroll-page.is-scrolling .lb-monster-float {
+  animation-play-state: paused;
+}
+
 .lb-monster-float.lb-delay-0 {
   animation-delay: 0s;
 }

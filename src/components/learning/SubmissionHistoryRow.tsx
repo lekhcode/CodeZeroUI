@@ -1,9 +1,17 @@
+import { memo } from "react";
 import { Box, Typography, alpha } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { SubmissionListItem, SubmissionStatus } from "@/types/api.types";
+import {
+  problemListDividerSx,
+  problemListLinkRowSx,
+  problemListMetaSx,
+  problemListTitleSx,
+  problemListTokens,
+} from "@/theme/problemList";
 import { sectionInsetX } from "@/theme/theme";
 
 dayjs.extend(relativeTime);
@@ -35,7 +43,10 @@ type SubmissionHistoryRowProps = {
   isLast?: boolean;
 };
 
-export function SubmissionHistoryRow({ submission, isLast = false }: SubmissionHistoryRowProps) {
+export const SubmissionHistoryRow = memo(function SubmissionHistoryRow({
+  submission,
+  isLast = false,
+}: SubmissionHistoryRowProps) {
   const color = VERDICT_COLOR[submission.status];
   const runtime =
     submission.runtimeMs !== null ? `${submission.runtimeMs}ms` : null;
@@ -50,22 +61,15 @@ export function SubmissionHistoryRow({ submission, isLast = false }: SubmissionH
       component={RouterLink}
       to={`/problems/${submission.problem.slug}`}
       className="submission-row"
-      sx={{
+      sx={problemListLinkRowSx({
         display: "flex",
         alignItems: "center",
-        gap: 1.25,
+        gap: problemListTokens.rowGap,
         px: sectionInsetX,
-        py: 1.1,
-        minHeight: 56,
-        textDecoration: "none",
-        color: "inherit",
-        borderBottom: isLast ? "none" : `1px solid ${alpha("#0f172a", 0.06)}`,
-        transition: "background-color 0.15s ease",
-        "&:active": { bgcolor: alpha("#0f172a", 0.04) },
-        "@media (hover: hover)": {
-          "&:hover": { bgcolor: alpha("#4f46e5", 0.04) },
-        },
-      }}
+        py: problemListTokens.rowPy,
+        minHeight: problemListTokens.rowMinHeight,
+        ...problemListDividerSx(!isLast),
+      })}
     >
       <Box
         sx={{
@@ -79,28 +83,14 @@ export function SubmissionHistoryRow({ submission, isLast = false }: SubmissionH
       />
 
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            lineHeight: 1.3,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <Typography noWrap sx={problemListTitleSx()}>
           {submission.problem.title}
         </Typography>
         <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
+          noWrap
+          sx={problemListMetaSx({
             display: "block",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            fontSize: "0.7rem",
-          }}
+          })}
         >
           {meta}
         </Typography>
@@ -110,7 +100,7 @@ export function SubmissionHistoryRow({ submission, isLast = false }: SubmissionH
         <Typography
           variant="caption"
           sx={{
-            fontWeight: 800,
+            fontWeight: 500,
             color,
             fontSize: "0.68rem",
             letterSpacing: "0.04em",
@@ -127,4 +117,4 @@ export function SubmissionHistoryRow({ submission, isLast = false }: SubmissionH
       <ChevronRightRoundedIcon sx={{ fontSize: 18, color: alpha("#0f172a", 0.25), flexShrink: 0 }} />
     </Box>
   );
-}
+});

@@ -1,8 +1,16 @@
+import { memo } from "react";
 import { Box, Typography } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import type { TrackedAssignment } from "@/types/api.types";
-import { accentLinkSx, miui, monoStatSx } from "@/theme/theme";
+import {
+  problemListDividerSx,
+  problemListLinkRowSx,
+  problemListMetaSx,
+  problemListTitleSx,
+  problemListTokens,
+} from "@/theme/problemList";
+import { miui, monoStatSx } from "@/theme/theme";
 
 type CompactAssignmentRowProps = {
   assignment: TrackedAssignment;
@@ -10,7 +18,7 @@ type CompactAssignmentRowProps = {
   variant?: "default" | "overdue";
 };
 
-export function CompactAssignmentRow({
+export const CompactAssignmentRow = memo(function CompactAssignmentRow({
   assignment,
   isLast = false,
   variant = "default",
@@ -21,25 +29,16 @@ export function CompactAssignmentRow({
     <Box
       component={RouterLink}
       to={`/problems/${assignment.problem.slug}`}
-      sx={{
+      sx={problemListLinkRowSx({
         display: "flex",
         alignItems: "center",
-        gap: 1,
-        pl: 4,
-        pr: 2,
-        py: 1.5,
-        minHeight: 48,
-        textDecoration: "none",
-        color: "inherit",
-        borderBottom: isLast ? "none" : `1px solid ${miui.border}`,
-        transition: "color 150ms ease",
-        "@media (prefers-reduced-motion: no-preference)": {
-          "&:hover .start-link": {
-            color: miui.text,
-            transform: "translateX(2px)",
-          },
-        },
-      }}
+        gap: problemListTokens.rowGap,
+        pl: 3,
+        pr: problemListTokens.rowPx,
+        py: problemListTokens.rowPy,
+        minHeight: problemListTokens.rowMinHeight,
+        ...problemListDividerSx(!isLast),
+      })}
     >
       <Box
         sx={{
@@ -50,19 +49,7 @@ export function CompactAssignmentRow({
           bgcolor: isOverdue ? miui.danger : miui.borderStrong,
         }}
       />
-      <Typography
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          fontSize: "14px",
-          fontWeight: 400,
-          lineHeight: 1.25,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          color: miui.text,
-        }}
-      >
+      <Typography sx={{ ...problemListTitleSx(), flex: 1, minWidth: 0 }}>
         {assignment.problem.title}
       </Typography>
 
@@ -71,8 +58,8 @@ export function CompactAssignmentRow({
           <Box
             sx={{
               ...monoStatSx,
-              fontSize: "10px",
-              fontWeight: 400,
+              fontSize: problemListTokens.metaSize,
+              fontWeight: problemListTokens.metaWeight,
               px: "6px",
               py: "1px",
               borderRadius: "3px",
@@ -89,22 +76,14 @@ export function CompactAssignmentRow({
       ) : (
         <Typography
           className="start-link"
-          sx={{
-            ...accentLinkSx,
-            fontSize: "12px",
-            fontWeight: 500,
+          sx={problemListMetaSx({
             flexShrink: 0,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.25,
-            "@media (prefers-reduced-motion: no-preference)": {
-              "&:hover": { color: miui.accentStrong, transform: "translateX(2px)" },
-            },
-          }}
+            color: miui.textMuted,
+          })}
         >
-          START →
+          Start →
         </Typography>
       )}
     </Box>
   );
-}
+});
