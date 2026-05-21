@@ -98,35 +98,3 @@ export function clearOAuthPending(): void {
   sessionStorage.removeItem(PENDING_TOKEN_KEY);
   sessionStorage.removeItem(PENDING_PREVIEW_KEY);
 }
-
-/** Read JWT payload for display only — server still verifies on complete-registration. */
-function readJwtPayload(token: string): Record<string, unknown> | null {
-  const segment = token.split(".")[1];
-  if (!segment) return null;
-  try {
-    const json = atob(segment.replace(/-/g, "+").replace(/_/g, "/"));
-    const parsed: unknown = JSON.parse(json);
-    return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : null;
-  } catch {
-    return null;
-  }
-}
-
-function providerFromJwt(value: unknown): OAuthPendingPreview["provider"] {
-  const raw = String(value ?? "").toUpperCase();
-  return raw === "GITHUB" ? "GITHUB" : "GOOGLE";
-}
-
-/** Build preview when API redirect only passes ?pendingToken= (no sessionStorage yet). */
-export function previewFromPendingToken(pendingToken: string): OAuthPendingPreview | null {
-  const payload = readJwtPayload(pendingToken);
-  if (!payload || payload.purpose !== "oauth_pending") return null;
-  const email = typeof payload.email === "string" ? payload.email.trim().toLowerCase() : "";
-  if (!email) return null;
-  return {
-    email,
-    suggestedName: typeof payload.name === "string" ? payload.name : null,
-    avatar: typeof payload.avatar === "string" ? payload.avatar : null,
-    provider: providerFromJwt(payload.provider),
-  };
-}

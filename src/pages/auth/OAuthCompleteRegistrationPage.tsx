@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import { OAuthGoogleProvider } from "@/components/auth/OAuthGoogleProvider";
 import { AuthInlineError } from "@/components/auth/AuthInlineError";
+import { CountrySelectField } from "@/components/auth/CountrySelectField";
+import { OnboardZeroMark3D } from "@/components/auth/OnboardZeroMark3D";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import {
   clearOAuthPending,
   getOAuthPendingPreview,
   getOAuthPendingToken,
-  previewFromPendingToken,
   storeOAuthPending,
-  type OAuthPendingPreview,
 } from "@/utils/oauthFlow";
 import type { PublicUser } from "@/types/api.types";
 import { useTransientAuthError } from "@/hooks/useTransientAuthError";
@@ -37,35 +37,15 @@ function OAuthCompleteRegistrationInner() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const fromQuery = searchParams.get("pendingToken")?.trim();
-    let existing = getOAuthPendingPreview();
-    let token = getOAuthPendingToken();
-
-    if (fromQuery) {
-      if (!existing) {
-        const fromUrl: OAuthPendingPreview = {
-          email: searchParams.get("email")?.trim().toLowerCase() ?? "",
-          suggestedName: searchParams.get("suggestedName")?.trim() || null,
-          avatar: searchParams.get("avatar")?.trim() || null,
-          provider: searchParams.get("provider") === "GITHUB" ? "GITHUB" : "GOOGLE",
-        };
-        if (!fromUrl.email) {
-          const fromJwt = previewFromPendingToken(fromQuery);
-          if (fromJwt) {
-            storeOAuthPending(fromQuery, fromJwt);
-          }
-        } else {
-          storeOAuthPending(fromQuery, fromUrl);
-        }
-      } else {
-        storeOAuthPending(fromQuery, existing);
-      }
-      token = getOAuthPendingToken();
-      existing = getOAuthPendingPreview();
+    const fromQuery = searchParams.get("pendingToken");
+    const existing = getOAuthPendingPreview();
+    if (fromQuery && existing) {
+      storeOAuthPending(fromQuery, existing);
     }
 
-    const p = existing;
-    if (!token || !p?.email) {
+    const token = getOAuthPendingToken();
+    const p = getOAuthPendingPreview();
+    if (!token || !p) {
       navigate("/register", { replace: true });
       return;
     }
@@ -122,9 +102,12 @@ function OAuthCompleteRegistrationInner() {
   return (
     <div className="auth-shell--onboard">
       <div className="auth-onboard">
-        <aside className="auth-onboard__aside">
+        <aside className="auth-onboard__visual" aria-label="CodeZero">
           <div className="auth-onboard__brand">
             code<span>zero</span>
+          </div>
+          <div className="auth-onboard__mark-wrap">
+            <OnboardZeroMark3D />
           </div>
           <div className="auth-onboard__context">
             <p className="auth-onboard__provider">Connected via {providerLabel}</p>
@@ -139,6 +122,7 @@ function OAuthCompleteRegistrationInner() {
         </aside>
 
         <main className="auth-onboard__main">
+          <div className="auth-onboard__main-inner">
           <h1 className="auth-onboard__title">Finish setup</h1>
           <p className="auth-onboard__subtitle">One short step before you enter the dojo.</p>
 
@@ -182,21 +166,14 @@ function OAuthCompleteRegistrationInner() {
               </select>
             </div>
 
-            <div className="auth-field">
-              <label htmlFor="oauth-country">Country</label>
-              <input
-                id="oauth-country"
-                type="text"
-                required
-                autoComplete="country-name"
-                value={country}
-                onChange={(e) => {
-                  setCountry(e.target.value);
-                  if (error) clearError();
-                }}
-                placeholder="India"
-              />
-            </div>
+            <CountrySelectField
+              id="oauth-country"
+              value={country}
+              onChange={(name) => {
+                setCountry(name);
+                if (error) clearError();
+              }}
+            />
 
             <AuthInlineError message={error} visible={visible} />
 
@@ -212,6 +189,7 @@ function OAuthCompleteRegistrationInner() {
             {" · "}
             <RouterLink to="/login">Sign in</RouterLink>
           </footer>
+          </div>
         </main>
       </div>
     </div>

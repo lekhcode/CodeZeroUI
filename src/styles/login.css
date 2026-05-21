@@ -10,23 +10,57 @@
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, min(440px, 42vw));
+  grid-template-columns: minmax(0, 1fr) minmax(300px, min(400px, 38vw));
   background: var(--bg-base);
   color: var(--text-1);
   font-family: "Syne", sans-serif;
   overflow: hidden;
   box-sizing: border-box;
+  isolation: isolate;
+}
+
+/* Unified ambient depth across both columns — no hard seam */
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 95% 75% at 72% 48%,
+    color-mix(in srgb, var(--bg-surface) 14%, transparent) 0%,
+    transparent 58%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 .login-left-panel {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-width: 0;
   padding: clamp(32px, 6vw, 64px);
   overflow: hidden;
-  background: var(--bg-base);
+  background: transparent;
+}
+
+/* Soft handoff into auth column — grid/atmosphere continues, no cut line */
+.login-left-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: clamp(72px, 14vw, 220px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--bg-base) 35%, transparent) 45%,
+    color-mix(in srgb, var(--bg-base) 88%, transparent) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .login-left-panel__grid {
@@ -115,25 +149,89 @@
 }
 
 .login-right-panel {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
-  min-width: min(440px, 42vw);
+  min-width: min(400px, 38vw);
   width: 100%;
   padding: clamp(32px, 5vh, 48px) clamp(24px, 4vw, 44px);
   padding-bottom: 40px;
-  background: var(--bg-surface);
-  border-left: 1px solid var(--border);
+  background: transparent;
+  border-left: none;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+/* Hero grid continues beneath auth — spatial continuity */
+.login-right-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(107, 114, 128, 0.28) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.22) 38%,
+    rgba(0, 0, 0, 0.08) 68%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.22) 38%,
+    rgba(0, 0, 0, 0.08) 68%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Matte atmospheric merge — embedded surface, not a separate slab */
+.login-right-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--bg-surface) 6%, transparent) 14%,
+    color-mix(in srgb, var(--bg-surface) 18%, var(--bg-base)) 42%,
+    color-mix(in srgb, var(--bg-surface) 32%, var(--bg-base)) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
 .login-right-inner {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 380px;
+  max-width: 360px;
   margin: 0 auto;
+}
+
+/* Barely noticeable depth behind form content — no glow, no card chrome */
+.login-right-inner::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  right: -28px;
+  top: -20px;
+  bottom: -20px;
+  border-radius: 10px;
+  background: radial-gradient(
+    ellipse 88% 72% at 50% 42%,
+    color-mix(in srgb, var(--bg-elevated) 18%, transparent) 0%,
+    transparent 72%
+  );
+  opacity: 0.65;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .login-brand {
@@ -303,5 +401,30 @@
     border-left: none;
     justify-content: flex-start;
     padding-top: 48px;
+  }
+
+  .login-right-panel::before {
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, transparent 42%);
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, transparent 42%);
+  }
+
+  .login-right-panel::after {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg-surface) 12%, var(--bg-base)) 0%,
+      var(--bg-base) 38%
+    );
+  }
+
+  .login-left-panel::after {
+    display: none;
+  }
+
+  .login-page::before {
+    background: radial-gradient(
+      ellipse 100% 60% at 50% 0%,
+      color-mix(in srgb, var(--bg-surface) 10%, transparent) 0%,
+      transparent 65%
+    );
   }
 }
