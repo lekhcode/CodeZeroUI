@@ -21,7 +21,9 @@ export function ProtectedRoute() {
   const { isLoading, isError, error, data } = useMe(hasToken);
 
   useEffect(() => {
-    if (data) setUser(data);
+    if (data) {
+      setUser(data);
+    }
   }, [data, setUser]);
 
   useEffect(() => {

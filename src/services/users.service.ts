@@ -8,6 +8,12 @@ export const usersService = {
     );
   },
 
+  dismissFirstTimeLogin() {
+    return unwrap<{ user: PublicUser }>(
+      api.patch("/api/v1/users/me", { firstTimeLogin: false as const }),
+    );
+  },
+
   updateProfile(body: {
     username?: string;
     fullName?: string | null;

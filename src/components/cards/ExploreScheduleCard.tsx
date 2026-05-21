@@ -28,6 +28,8 @@ type ExploreScheduleCardProps = {
   onEnroll?: () => void;
   /** Topic / study plan — open curriculum preview */
   onPreview?: () => void;
+  /** First-run walkthrough spotlight target */
+  onboardingTargetId?: string;
 };
 
 export function ExploreScheduleCard({
@@ -35,6 +37,7 @@ export function ExploreScheduleCard({
   enrolled,
   onEnroll,
   onPreview,
+  onboardingTargetId,
 }: ExploreScheduleCardProps) {
   const meta = getTemplateMeta(template.slug, template.type);
   const Icon = TYPE_ICONS[template.type];
@@ -202,6 +205,7 @@ export function ExploreScheduleCard({
         ) : null}
 
         <Button
+          data-onboarding={onboardingTargetId}
           variant={enrolled ? "outlined" : "contained"}
           fullWidth
           disabled={enrolled}

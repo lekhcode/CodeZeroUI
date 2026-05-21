@@ -104,7 +104,7 @@ export function BrainCachePage() {
           minWidth: 0,
         }}
       >
-        <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Box data-onboarding="brain-cache-header" sx={{ minWidth: 0, flex: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
             Brain Cache
           </Typography>
