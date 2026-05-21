@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { AUTH_HOME } from "@/constants/routes";
+import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { tokenStorage } from "@/utils/storage";
@@ -25,10 +24,20 @@ export function useMe(enabled = true) {
   });
 }
 
+function resolvePostAuthPath(location: ReturnType<typeof useLocation>): string {
+  const from = location.state as { from?: { pathname?: string } } | null;
+  const path = from?.from?.pathname;
+  if (path && path !== "/login" && path !== "/register" && !path.startsWith("/verify-email")) {
+    return path;
+  }
+  return "/community";
+}
+
 export function useLogin() {
   const setSession = useAuthStore((s) => s.setSession);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
@@ -37,7 +46,7 @@ export function useLogin() {
       clearPendingVerifyEmail();
       setSession(data.user, data.accessToken);
       void queryClient.invalidateQueries({ queryKey: queryKeys.me });
-      navigate(AUTH_HOME, { replace: true });
+      navigate(resolvePostAuthPath(location), { replace: true });
     },
     onError: (error: Error, variables) => {
       if (error instanceof ApiRequestError && error.code === "EMAIL_NOT_VERIFIED") {

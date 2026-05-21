@@ -5,8 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import type { ScheduleTemplate } from "@/types/api.types";
 import { schedulesService } from "@/services/schedules.service";
 import { queryKeys } from "@/hooks/queryKeys";
+import { AuthInlineError } from "@/components/auth/AuthInlineError";
 import { QuestionPreviewList } from "@/modules/explore/topic-preview/QuestionPreviewList";
 import { TopicOverviewPanel } from "@/modules/explore/topic-preview/TopicOverviewPanel";
+import { ApiRequestError } from "@/services/api";
+import { getAuthErrorMessage } from "@/utils/authErrors";
 import { miui } from "@/theme/theme";
 
 type TopicPreviewModalProps = {
@@ -29,10 +32,14 @@ export function TopicPreviewModal({
 
   const previewQuery = useQuery({
     queryKey: queryKeys.templatePreview(template?.slug ?? ""),
-    queryFn: () => schedulesService.getTemplatePreview(template!.slug),
+    queryFn: () => schedulesService.getTemplatePreview(template!.slug, template!),
     enabled: open && template !== null,
     staleTime: 5 * 60_000,
     gcTime: 10 * 60_000,
+    retry: (count, err) => {
+      if (err instanceof ApiRequestError && err.status === 404) return false;
+      return count < 2;
+    },
   });
 
   const problems = useMemo(
@@ -42,6 +49,11 @@ export function TopicPreviewModal({
 
   const listLabel =
     template?.type === "STUDY_PLAN" ? "Plan curriculum" : "Topic questions";
+
+  const previewError =
+    previewQuery.isError && !previewQuery.isLoading
+      ? getAuthErrorMessage(previewQuery.error, "Could not load preview.")
+      : "";
 
   if (!template) return null;
 
@@ -140,6 +152,7 @@ export function TopicPreviewModal({
                 order: isMobile ? 2 : 0,
               }}
             >
+              <AuthInlineError message={previewError} visible={Boolean(previewError)} />
               <QuestionPreviewList
                 problems={problems}
                 loading={previewQuery.isLoading}

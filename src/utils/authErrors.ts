@@ -9,6 +9,12 @@ const OTP_MESSAGES: Record<string, string> = {
   EMAIL_NOT_VERIFIED: "Verify your email before signing in.",
   EMAIL_ALREADY_VERIFIED: "This email is already verified. Sign in instead.",
   EMAIL_SEND_FAILED: "We couldn't send the email right now. Try again shortly.",
+  OAUTH_NOT_CONFIGURED: "Social sign-in is not configured on the server. Try email sign-in.",
+  GITHUB_CODE_REUSED: "That GitHub sign-in was already completed. Open login and try again.",
+  OAUTH_ACCOUNT_NOT_FOUND: "No account found for this email.",
+  OAUTH_ACCOUNT_EXISTS: "An account with this email already exists. Sign in instead.",
+  OAUTH_PENDING_EXPIRED: "Registration session expired. Start again from Create account.",
+  OAUTH_PENDING_INVALID: "Invalid registration session. Start again from Create account.",
   RESEND_SANDBOX_RECIPIENT:
     "Email is in Resend test mode. Use your verified domain in EMAIL_FROM, or test with delivered@resend.dev.",
   RESEND_DOMAIN_REQUIRED: "Set EMAIL_FROM to an address on your verified Resend domain.",

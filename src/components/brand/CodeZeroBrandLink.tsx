@@ -1,8 +1,5 @@
 import { Box, alpha, type SxProps, type Theme } from "@mui/material";
 import { Link } from "react-router-dom";
-import { AUTH_HOME, ROUTES } from "@/constants/routes";
-import { useAuthStore } from "@/store/authStore";
-import { tokenStorage } from "@/utils/storage";
 import { CodeZeroLogo } from "./CodeZeroLogo";
 import { miui } from "@/theme/theme";
 
@@ -19,17 +16,10 @@ export function CodeZeroBrandLink({
   onClick,
   sx,
 }: CodeZeroBrandLinkProps) {
-  const user = useAuthStore((s) => s.user);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const homeTo =
-    (Boolean(tokenStorage.get()) || isAuthenticated) && user?.isEmailVerified
-      ? AUTH_HOME
-      : ROUTES.landing;
-
   return (
     <Box
       component={Link}
-      to={homeTo}
+      to="/community"
       onClick={onClick}
       className="zero-mark-spin-host"
       aria-label="CodeZero — community"

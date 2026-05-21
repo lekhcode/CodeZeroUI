@@ -35,6 +35,23 @@ export type LoginResult = {
   accessToken: string;
 };
 
+export type OAuthPendingRegistrationResult = {
+  status: "pending_registration";
+  pendingToken: string;
+  email: string;
+  suggestedName: string | null;
+  avatar: string | null;
+  provider: "GOOGLE" | "GITHUB";
+};
+
+export type OAuthAuthResult = LoginResult | OAuthPendingRegistrationResult;
+
+export function isOAuthPendingRegistration(
+  result: OAuthAuthResult,
+): result is OAuthPendingRegistrationResult {
+  return "status" in result && result.status === "pending_registration";
+}
+
 export type RegisterResult = {
   user: PublicUser;
   requiresVerification: true;

@@ -1,0 +1,333 @@
+/* Auth + OAuth onboarding — Linear / Vercel–style developer surfaces */
+
+.auth-shell--onboard {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: var(--bg-base);
+  padding: 0;
+}
+
+.auth-onboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
+  width: 100%;
+  max-width: 880px;
+  min-height: 100vh;
+  margin: 0 auto;
+  animation: auth-fade-in 0.35s ease;
+}
+
+@media (max-width: 720px) {
+  .auth-onboard {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+
+  .auth-onboard__aside {
+    display: none;
+  }
+}
+
+.auth-onboard__aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 36px;
+  border-right: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.auth-onboard__brand {
+  font-family: "Syne", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+}
+
+.auth-onboard__brand span {
+  color: var(--text-3);
+}
+
+.auth-onboard__context {
+  margin-top: auto;
+  padding-top: 48px;
+}
+
+.auth-onboard__provider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Fira Code", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+
+.auth-onboard__email {
+  font-family: "Fira Code", monospace;
+  font-size: 13px;
+  color: var(--text-2);
+  word-break: break-all;
+}
+
+.auth-onboard__hint {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-3);
+  max-width: 260px;
+}
+
+.auth-onboard__main {
+  padding: 40px 32px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-onboard__title {
+  margin: 0 0 6px;
+  font-family: "Syne", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text-1);
+}
+
+.auth-onboard__subtitle {
+  margin: 0 0 28px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.auth-onboard__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border-mid);
+  object-fit: cover;
+  margin-bottom: 16px;
+}
+
+.auth-onboard__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.auth-onboard__footer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-family: "Fira Code", monospace;
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.auth-onboard__footer a {
+  color: var(--text-2);
+  text-decoration: none;
+}
+
+.auth-onboard__footer a:hover {
+  color: var(--text-1);
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-field label {
+  font-family: "Fira Code", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.auth-field input,
+.auth-field select {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: var(--text-1);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.auth-field input::placeholder {
+  color: var(--text-3);
+}
+
+.auth-field input:focus,
+.auth-field select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.auth-field select {
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%),
+    linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 16px,
+    calc(100% - 11px) 16px;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+
+.auth-inline-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  font-family: "Fira Code", monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--danger);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.auth-inline-error--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.auth-inline-error__dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--danger);
+  opacity: 0.85;
+}
+
+.auth-shell--compact .auth-panel {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 32px 28px 28px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  animation: auth-fade-in 0.3s ease;
+}
+
+.auth-shell--compact {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--bg-base);
+}
+
+.auth-shell--compact .auth-panel__brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.auth-panel__title {
+  margin: 0 0 4px;
+  font-family: "Syne", sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+}
+
+.auth-panel__subtitle {
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.45;
+}
+
+.oauth-callback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100vh;
+  background: var(--bg-base);
+  font-family: "Fira Code", monospace;
+  font-size: 12px;
+  color: var(--text-3);
+  animation: auth-fade-in 0.25s ease;
+}
+
+.oauth-callback__pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-2);
+  animation: oauth-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes oauth-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.login-error,
+.login-page .auth-inline-error {
+  margin-bottom: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: "Fira Code", monospace;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.login-page .auth-inline-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}

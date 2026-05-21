@@ -1,8 +1,8 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { AUTH_HOME } from "@/constants/routes";
 import { useAuthStore } from "@/store/authStore";
 import { tokenStorage } from "@/utils/storage";
 import { getPendingVerifyEmail } from "@/utils/pendingVerification";
+import { getOAuthPendingToken } from "@/utils/oauthFlow";
 
 /**
  * Auth-only routes: redirect verified sessions to the app; keep pending verification on verify-email.
@@ -17,6 +17,10 @@ export function GuestRoute() {
     return <Outlet />;
   }
 
+  if (location.pathname === "/register/oauth/complete" && getOAuthPendingToken()) {
+    return <Outlet />;
+  }
+
   if (user && !user.isEmailVerified) {
     const email = user.email || getPendingVerifyEmail();
     if (!location.pathname.startsWith("/verify-email")) {
@@ -28,7 +32,7 @@ export function GuestRoute() {
   }
 
   if (user?.isEmailVerified) {
-    return <Navigate to={AUTH_HOME} replace />;
+    return <Navigate to="/community" replace />;
   }
 
   return <Outlet />;

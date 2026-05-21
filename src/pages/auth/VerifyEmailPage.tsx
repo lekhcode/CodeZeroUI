@@ -9,7 +9,6 @@ import {
   setPendingVerifyEmail,
   startResendCooldown,
 } from "@/utils/pendingVerification";
-import { AUTH_HOME } from "@/constants/routes";
 import { miui } from "@/theme/theme";
 
 const DEFAULT_COOLDOWN = 60;
@@ -46,6 +45,14 @@ export function VerifyEmailPage() {
     return null;
   }
 
+  const from =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "from" in location.state &&
+    typeof (location.state as { from?: { pathname?: string } }).from?.pathname === "string"
+      ? (location.state as { from: { pathname: string } }).from.pathname
+      : "/community";
+
   return (
     <OtpVerificationExperience
       email={email}
@@ -57,7 +64,7 @@ export function VerifyEmailPage() {
         const result = await authService.verifyEmail(email, code);
         clearPendingVerifyEmail();
         setSession(result.user, result.accessToken);
-        window.setTimeout(() => navigate(AUTH_HOME, { replace: true }), 600);
+        window.setTimeout(() => navigate(from, { replace: true }), 600);
       }}
       onResend={async () => {
         const r = await authService.resendOtp(email);
