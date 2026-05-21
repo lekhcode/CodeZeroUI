@@ -249,11 +249,14 @@ export function ProblemCatalogInfiniteList({
     );
   }
 
+  const labDefaultHeight = maxHeight === DEFAULT_LAB_HEIGHT;
   const heightSx = fillHeight
     ? { flex: 1, minHeight: 0, height: "100%", maxHeight: "100%" }
     : {
         maxHeight,
-        minHeight: compact ? 280 : flat ? 360 : 400,
+        ...(compact && labDefaultHeight ? { minHeight: 280 } : {}),
+        ...(!compact && !flat ? { minHeight: 400 } : {}),
+        ...(!compact && flat && labDefaultHeight ? { minHeight: 360 } : {}),
       };
 
   return (

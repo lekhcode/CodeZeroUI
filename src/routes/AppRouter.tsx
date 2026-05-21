@@ -23,11 +23,10 @@ import {
 import { GitHubCallbackPage } from "@/pages/auth/GitHubCallbackPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { RegisterPage } from "@/pages/auth/RegisterPage";
+import { OAuthCompleteRegistrationPage } from "@/pages/auth/OAuthCompleteRegistrationPage";
 import { VerifyEmailPage } from "@/pages/auth/VerifyEmailPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
-import { LandingPage } from "@/pages/landing/LandingPage";
-import { ROUTES } from "@/constants/routes";
 
 function Lazy({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LazyRouteFallback />}>{children}</Suspense>;
@@ -45,6 +44,7 @@ export function AppRouter() {
         <Route element={<GuestRoute />}>
           <Route element={<AuthLayout />}>
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/register/oauth/complete" element={<OAuthCompleteRegistrationPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -160,8 +160,8 @@ export function AppRouter() {
           </Route>
         </Route>
 
-        <Route path={ROUTES.landing} element={<LandingPage />} />
-        <Route path="*" element={<Navigate to={ROUTES.landing} replace />} />
+        <Route path="/" element={<Navigate to="/community" replace />} />
+        <Route path="*" element={<Navigate to="/community" replace />} />
       </Routes>
     </BrowserRouter>
   );

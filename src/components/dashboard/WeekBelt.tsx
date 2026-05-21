@@ -9,24 +9,64 @@ import { getUtcDateKey, utcDaysBeforeToday } from "@/utils/date";
 import { miui, monoStatSx } from "@/theme/theme";
 
 const MOON_BY_WEEK = ["🌑", "🌓", "🌕", "🌗"] as const;
-const WEEK_LABELS = ["W1", "W2", "W3", "W4"] as const;
 const DAY_HEADERS = ["S", "M", "T", "W", "T", "F", "S"] as const;
-const CYCLE_DAYS = 28;
+const CYCLE_WEEKS = 4;
+const CYCLE_DAYS = CYCLE_WEEKS * 7;
 
 const surface = miui.paper;
 const secondary = miui.elevated;
 const info = miui.primary;
 const infoTint = alpha(miui.primary, 0.22);
 
+/** UTC Sunday 00:00 for the week that contains `dateKey`. */
+function startOfUtcWeek(dateKey: string): Date {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const start = new Date(date);
+  start.setUTCDate(date.getUTCDate() - date.getUTCDay());
+  return start;
+}
+
+/** Last 4 calendar weeks (Sun–Sat), aligned so column headers match real weekdays. */
 function buildCycleDateKeys(reference = new Date()): string[] {
-  const start = new Date(
-    Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), 1),
-  );
+  const todayKey = getUtcDateKey(reference);
+  const thisWeekSunday = startOfUtcWeek(todayKey);
+  const cycleStart = new Date(thisWeekSunday);
+  cycleStart.setUTCDate(thisWeekSunday.getUTCDate() - 21);
+
   return Array.from({ length: CYCLE_DAYS }, (_, i) => {
-    const d = new Date(start);
-    d.setUTCDate(start.getUTCDate() + i);
+    const d = new Date(cycleStart);
+    d.setUTCDate(cycleStart.getUTCDate() + i);
     return getUtcDateKey(d);
   });
+}
+
+/** First Sun-start week that has any day in the given UTC month. */
+function firstWeekStartInUtcMonth(year: number, monthIndex0: number): Date {
+  const monthFirstKey = getUtcDateKey(new Date(Date.UTC(year, monthIndex0, 1)));
+  let start = startOfUtcWeek(monthFirstKey);
+  if (start.getUTCMonth() < monthIndex0) {
+    start = new Date(start);
+    start.setUTCDate(start.getUTCDate() + 7);
+  }
+  return start;
+}
+
+/** Calendar week-of-month (Sun–Sat), 1-based — matches how people count weeks in a month. */
+function utcWeekOfMonth(dateKey: string): number {
+  const [y, m] = dateKey.split("-").map(Number);
+  const weekStart = startOfUtcWeek(dateKey);
+  const first = firstWeekStartInUtcMonth(y, m - 1);
+  const diffDays = Math.round((weekStart.getTime() - first.getTime()) / 86_400_000);
+  return Math.floor(diffDays / 7) + 1;
+}
+
+function weekCardLabel(weekStartKey: string, isActive: boolean): string {
+  if (isActive) {
+    const wom = utcWeekOfMonth(weekStartKey);
+    return `Wk ${wom}`;
+  }
+  return dayjs(weekStartKey).format("MMM D");
 }
 
 function cellOpacity(count: number): number {
@@ -67,7 +107,14 @@ export function WeekBelt() {
   );
   const activeWeekIndex = Math.floor(todayIndex / 7);
 
-  const monthLabel = dayjs(cycleStartKey).format("MMMM YYYY");
+  const todayWeekOfMonth = utcWeekOfMonth(todayKey);
+  const todayMonthLabel = dayjs(todayKey).format("MMMM");
+
+  const cycleEndKey = cycleDateKeys[CYCLE_DAYS - 1] ?? todayKey;
+  const rangeLabel =
+    cycleStartKey.slice(0, 7) === cycleEndKey.slice(0, 7)
+      ? dayjs(cycleStartKey).format("MMMM YYYY")
+      : `${dayjs(cycleStartKey).format("MMM D")} – ${dayjs(cycleEndKey).format("MMM D")}`;
 
   const cycleTotalSolved = useMemo(() => {
     let total = 0;
@@ -125,7 +172,7 @@ export function WeekBelt() {
               Weekly Belt
             </Typography>
             <Typography sx={{ fontSize: "11px", color: miui.textDim, lineHeight: 1.2 }}>
-              28-day lunar cycle
+              Week {todayWeekOfMonth} of {todayMonthLabel} · 4-week belt
             </Typography>
           </Box>
         </Box>
@@ -141,7 +188,7 @@ export function WeekBelt() {
             flexShrink: 0,
           }}
         >
-          {monthLabel}
+          {rangeLabel}
         </Box>
       </Box>
 
@@ -154,9 +201,11 @@ export function WeekBelt() {
           mb: 0.75,
         }}
       >
-        {WEEK_LABELS.map((weekLabel, weekIdx) => {
+        {Array.from({ length: CYCLE_WEEKS }, (_, weekIdx) => {
           const weekDays = cycleDateKeys.slice(weekIdx * 7, weekIdx * 7 + 7);
+          const weekStartKey = weekDays[0] ?? todayKey;
           const isActive = weekIdx === activeWeekIndex;
+          const weekLabel = weekCardLabel(weekStartKey, isActive);
 
           let weekTotal = 0;
           let maxDayCount = 0;
@@ -387,14 +436,18 @@ export function WeekBelt() {
               mt: 0.35,
             }}
           >
-            {MOON_BY_WEEK.map((moon, i) => (
-              <Typography
-                key={WEEK_LABELS[i]}
-                sx={{ fontSize: "9px", color: miui.textDim, whiteSpace: "nowrap" }}
-              >
-                {moon} {WEEK_LABELS[i]}
-              </Typography>
-            ))}
+            {Array.from({ length: CYCLE_WEEKS }, (_, i) => {
+              const weekStart = cycleDateKeys[i * 7] ?? todayKey;
+              const label = i === activeWeekIndex ? `Wk ${utcWeekOfMonth(weekStart)}` : dayjs(weekStart).format("MMM D");
+              return (
+                <Typography
+                  key={weekStart}
+                  sx={{ fontSize: "9px", color: miui.textDim, whiteSpace: "nowrap" }}
+                >
+                  {MOON_BY_WEEK[i]} {label}
+                </Typography>
+              );
+            })}
           </Box>
         </Box>
       </Box>

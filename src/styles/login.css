@@ -240,16 +240,13 @@
   color: var(--text-1);
 }
 
-.login-error {
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-family: "Fira Code", monospace;
-  font-size: 12px;
-  color: var(--danger);
-  background: var(--danger-soft);
-  border: 1px solid var(--danger-border);
+.login-form-submit {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  overflow: visible;
 }
+
+/* Auth errors use .auth-inline-error — see auth-experience.css */
 
 .login-footer {
   margin: 16px 0 0;
@@ -284,19 +281,9 @@
   margin: 0;
 }
 
-.login-page .oauth-icon-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  overflow: visible;
-}
-
-.login-page .oauth-icon-slot > div {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+.login-page .oauth-icon-hit {
+  width: 40px;
+  height: 40px;
 }
 
 @media (max-width: 900px) {

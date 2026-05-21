@@ -361,7 +361,9 @@ export function DashboardPage() {
                   flat
                   preview
                   virtualized={false}
-                  scrollContained={false}
+                  scrollContained
+                  maxHeight={216}
+                  scrollPageClass="dashboard-library-scroll"
                   enableLoadMore={false}
                 />
               </Panel>

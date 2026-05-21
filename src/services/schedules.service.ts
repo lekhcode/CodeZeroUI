@@ -5,14 +5,12 @@ import type {
   UserSchedule,
 } from "@/types/api.types";
 import { api, unwrap } from "./api";
+import { fetchTemplatePreview } from "./templatePreviewFallback";
 
 /** Backend wraps list payloads — unwrap to typed arrays/objects for React Query. */
 export const schedulesService = {
-  async getTemplatePreview(slug: string): Promise<TemplatePreviewPayload> {
-    const payload = await unwrap<{ preview: TemplatePreviewPayload }>(
-      api.get(`/api/v1/schedule-templates/${encodeURIComponent(slug)}/preview`),
-    );
-    return payload.preview;
+  async getTemplatePreview(slug: string, template: ScheduleTemplate): Promise<TemplatePreviewPayload> {
+    return fetchTemplatePreview(slug, template);
   },
 
   async listTemplates(): Promise<ScheduleTemplate[]> {

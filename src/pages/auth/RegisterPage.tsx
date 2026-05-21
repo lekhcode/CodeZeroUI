@@ -1,12 +1,16 @@
-import { Alert, Box, Button, Link, Stack, TextField, Typography } from "@mui/material";
+import { Box, Divider, Link, Stack, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link as RouterLink } from "react-router-dom";
 import { useRegister } from "@/hooks/useAuth";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { OAuthGoogleProvider } from "@/components/auth/OAuthGoogleProvider";
+import { OAuthSignInSection } from "@/components/auth/OAuthSignInSection";
+import { AuthInlineError } from "@/components/auth/AuthInlineError";
+import { useTransientAuthError } from "@/hooks/useTransientAuthError";
 import { validatePassword, isValidUsernameFormat, normalizeUsername } from "@/utils/passwordPolicy";
-import { useState } from "react";
+import { miui } from "@/theme/theme";
 
 const schema = z
   .object({
@@ -39,82 +43,137 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>;
 
-export function RegisterPage() {
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "6px",
+    minHeight: 38,
+    fontSize: "13px",
+    bgcolor: "transparent",
+    "& fieldset": { borderColor: miui.border },
+    "&:hover fieldset": { borderColor: miui.borderMid },
+    "&.Mui-focused fieldset": { borderColor: miui.accent, borderWidth: "1px" },
+  },
+  "& .MuiInputLabel-root": {
+    fontSize: "12px",
+    color: miui.textDim,
+    fontWeight: 400,
+  },
+} as const;
+
+function RegisterPageInner() {
   const registerMutation = useRegister();
-  const [password, setPassword] = useState("");
+  const {
+    error: oauthError,
+    visible: oauthErrorVisible,
+    setError: setOauthError,
+    clearError: clearOauthError,
+  } = useTransientAuthError();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  const password = watch("password", "");
+
+  const mutationMessage =
+    registerMutation.isError && registerMutation.error ? registerMutation.error.message : "";
 
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit((v) =>
+      onSubmit={handleSubmit((v) => {
+        clearOauthError();
         registerMutation.mutate({
           email: v.email.trim().toLowerCase(),
           password: v.password,
           username: v.username?.trim() ? normalizeUsername(v.username) : undefined,
-        }),
-      )}
+        });
+      })}
     >
-      <Typography variant="h5" sx={{ fontWeight: 800 }} gutterBottom>
-        Start learning
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Build your personalized practice OS
-      </Typography>
+      <h1 className="auth-panel__title">Create account</h1>
+      <p className="auth-panel__subtitle">Build your practice OS — email or social sign-up.</p>
 
-      {registerMutation.isError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {registerMutation.error.message}
-        </Alert>
-      )}
-
-      <Stack spacing={2}>
+      <Stack spacing={1.75}>
         <TextField
           label="Email"
           type="email"
           fullWidth
+          size="small"
           {...register("email")}
           error={Boolean(errors.email)}
           helperText={errors.email?.message}
+          sx={fieldSx}
         />
         <TextField
           label="Username (optional)"
           fullWidth
+          size="small"
           {...register("username")}
           error={Boolean(errors.username)}
           helperText={errors.username?.message ?? "e.g. codezero_dev"}
+          sx={fieldSx}
         />
         <TextField
           label="Password"
           type="password"
           fullWidth
-          {...register("password", { onChange: (e) => setPassword(e.target.value) })}
+          size="small"
+          {...register("password")}
           error={Boolean(errors.password)}
           helperText={errors.password?.message}
+          sx={fieldSx}
         />
         <PasswordStrength password={password} />
         <TextField
           label="Confirm password"
           type="password"
           fullWidth
+          size="small"
           {...register("confirm")}
           error={Boolean(errors.confirm)}
           helperText={errors.confirm?.message}
+          sx={fieldSx}
         />
-        <Button type="submit" variant="contained" size="large" fullWidth disabled={registerMutation.isPending}>
-          {registerMutation.isPending ? "Creating…" : "Create account"}
-        </Button>
-        <Typography variant="body2" sx={{ textAlign: "center" }}>
+
+        <AuthInlineError message={mutationMessage} visible={Boolean(mutationMessage)} />
+
+        <div className="login-form-submit">
+          <button type="submit" className="login-submit-btn" disabled={registerMutation.isPending}>
+            {registerMutation.isPending ? "Creating…" : "Create account"}
+          </button>
+        </div>
+
+        <Divider sx={{ my: 0.5, color: "text.secondary", fontSize: "0.75rem", opacity: 0.7 }}>
+          or
+        </Divider>
+
+        <OAuthSignInSection
+          intent="register"
+          variant="auth"
+          label="or continue with"
+          disabled={registerMutation.isPending}
+          error={oauthError}
+          errorVisible={oauthErrorVisible}
+          onError={setOauthError}
+          onClearError={clearOauthError}
+        />
+
+        <Typography variant="body2" sx={{ textAlign: "center", fontSize: "12px", color: "text.secondary" }}>
           Already have an account?{" "}
-          <Link component={RouterLink} to="/login" sx={{ fontWeight: 700 }}>
+          <Link component={RouterLink} to="/login" sx={{ fontWeight: 500, color: "text.primary" }}>
             Sign in
           </Link>
         </Typography>
       </Stack>
     </Box>
+  );
+}
+
+export function RegisterPage() {
+  return (
+    <OAuthGoogleProvider>
+      <RegisterPageInner />
+    </OAuthGoogleProvider>
   );
 }
