@@ -8,7 +8,9 @@ import {
   clearOAuthPending,
   getOAuthPendingPreview,
   getOAuthPendingToken,
+  previewFromPendingToken,
   storeOAuthPending,
+  type OAuthPendingPreview,
 } from "@/utils/oauthFlow";
 import type { PublicUser } from "@/types/api.types";
 import { useTransientAuthError } from "@/hooks/useTransientAuthError";
@@ -35,15 +37,35 @@ function OAuthCompleteRegistrationInner() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const fromQuery = searchParams.get("pendingToken");
-    const existing = getOAuthPendingPreview();
-    if (fromQuery && existing) {
-      storeOAuthPending(fromQuery, existing);
+    const fromQuery = searchParams.get("pendingToken")?.trim();
+    let existing = getOAuthPendingPreview();
+    let token = getOAuthPendingToken();
+
+    if (fromQuery) {
+      if (!existing) {
+        const fromUrl: OAuthPendingPreview = {
+          email: searchParams.get("email")?.trim().toLowerCase() ?? "",
+          suggestedName: searchParams.get("suggestedName")?.trim() || null,
+          avatar: searchParams.get("avatar")?.trim() || null,
+          provider: searchParams.get("provider") === "GITHUB" ? "GITHUB" : "GOOGLE",
+        };
+        if (!fromUrl.email) {
+          const fromJwt = previewFromPendingToken(fromQuery);
+          if (fromJwt) {
+            storeOAuthPending(fromQuery, fromJwt);
+          }
+        } else {
+          storeOAuthPending(fromQuery, fromUrl);
+        }
+      } else {
+        storeOAuthPending(fromQuery, existing);
+      }
+      token = getOAuthPendingToken();
+      existing = getOAuthPendingPreview();
     }
 
-    const token = getOAuthPendingToken();
-    const p = getOAuthPendingPreview();
-    if (!token || !p) {
+    const p = existing;
+    if (!token || !p?.email) {
       navigate("/register", { replace: true });
       return;
     }
