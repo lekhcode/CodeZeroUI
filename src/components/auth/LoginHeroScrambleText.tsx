@@ -154,7 +154,7 @@ export function LoginHeroScrambleText() {
       const target = SENTENCES[indexRef.current] ?? SENTENCES[0];
       const phase = phaseRef.current;
       const elapsed = now - phaseStartRef.current;
-      let display = target;
+      let display: string = target;
 
       if (phase === "reveal") {
         const p = Math.min(1, elapsed / REVEAL_MS);
