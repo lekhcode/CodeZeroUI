@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   Box,
   Drawer,
@@ -31,15 +32,25 @@ import { glassSx, miui } from "@/theme/theme";
 const DRAWER_WIDTH = 228;
 const DRAWER_COLLAPSED = 60;
 
-const NAV = [
+const NAV: Array<{
+  to: string;
+  label: string;
+  icon: ReactNode;
+  onboardingId?: string;
+}> = [
   { to: "/community", label: "Community", icon: <ForumRoundedIcon /> },
   { to: "/dashboard", label: "Dashboard", icon: <DashboardRoundedIcon /> },
-  { to: "/today", label: "Today", icon: <TodayRoundedIcon /> },
+  { to: "/today", label: "Today", icon: <TodayRoundedIcon />, onboardingId: "nav-today" },
   { to: "/lab", label: "Lab", icon: <CodeRoundedIcon /> },
   { to: "/submissions", label: "Submissions", icon: <HistoryRoundedIcon /> },
-  { to: "/brain-cache", label: "Brain Cache", icon: <PsychologyRoundedIcon /> },
-  { to: "/schedules", label: "My schedules", icon: <EventNoteRoundedIcon /> },
-  { to: "/templates", label: "Explore", icon: <ExploreRoundedIcon /> },
+  {
+    to: "/brain-cache",
+    label: "Brain Cache",
+    icon: <PsychologyRoundedIcon />,
+    onboardingId: "nav-brain-cache",
+  },
+  { to: "/schedules", label: "My schedules", icon: <EventNoteRoundedIcon />, onboardingId: "nav-schedules" },
+  { to: "/templates", label: "Explore", icon: <ExploreRoundedIcon />, onboardingId: "nav-templates" },
   { to: "/settings", label: "Settings", icon: <SettingsRoundedIcon /> },
 ];
 
@@ -89,7 +100,7 @@ function NavContent({
           </Box>
         )}
       </Box>
-      <List sx={{ flex: 1, px: collapsed ? 0 : undefined }}>
+      <List data-onboarding="sidebar-nav" sx={{ flex: 1, px: collapsed ? 0 : undefined }}>
         {NAV.map((item) => {
           const active = location.pathname.startsWith(item.to);
           const btn = (
@@ -97,6 +108,7 @@ function NavContent({
               component={NavLink}
               to={item.to}
               onClick={onNavigate}
+              data-onboarding={item.onboardingId}
               className={active ? "nav-item active" : "nav-item"}
               sx={{
                 borderRadius: 0,

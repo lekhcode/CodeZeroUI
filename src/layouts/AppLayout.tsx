@@ -6,6 +6,7 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { RouteLoadingOverlay } from "@/components/ui/RouteLoadingOverlay";
 import { RouteLoadingProvider, useRouteLoading } from "@/contexts/RouteLoadingContext";
 import { miui } from "@/theme/theme";
+import { OnboardingProvider } from "@/onboarding/OnboardingProvider";
 
 function MainOutlet() {
   const loading = useRouteLoading();
@@ -32,29 +33,31 @@ function MainOutlet() {
 export function AppLayout() {
   return (
     <RouteLoadingProvider>
-      <Box sx={{ display: "flex", height: "100dvh", maxHeight: "100dvh", overflow: "hidden", bgcolor: miui.bg }}>
-        <Sidebar />
-        <Box
-          component="main"
-          sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, position: "relative", zIndex: 1 }}
-        >
-          <Topbar />
+      <OnboardingProvider>
+        <Box sx={{ display: "flex", height: "100dvh", maxHeight: "100dvh", overflow: "hidden", bgcolor: miui.bg }}>
+          <Sidebar />
           <Box
-            sx={{
-              flex: 1,
-              bgcolor: miui.bg,
-              minHeight: 0,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-            }}
+            component="main"
+            sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, position: "relative", zIndex: 1 }}
           >
-            <RouteLoadingOverlay />
-            <MainOutlet />
+            <Topbar />
+            <Box
+              sx={{
+                flex: 1,
+                bgcolor: miui.bg,
+                minHeight: 0,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+              }}
+            >
+              <RouteLoadingOverlay />
+              <MainOutlet />
+            </Box>
           </Box>
         </Box>
-      </Box>
+      </OnboardingProvider>
     </RouteLoadingProvider>
   );
 }

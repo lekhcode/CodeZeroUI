@@ -374,6 +374,22 @@
   margin-bottom: 12px;
 }
 
+.auth-onboard__provider-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border-mid);
+  background: color-mix(in srgb, var(--bg-surface) 88%, #000);
+}
+
+.auth-onboard__provider-icon svg {
+  display: block;
+}
+
 .auth-onboard__email {
   font-family: "Fira Code", monospace;
   font-size: 13px;

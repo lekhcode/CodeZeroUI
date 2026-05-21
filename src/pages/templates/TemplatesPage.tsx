@@ -76,7 +76,7 @@ export function TemplatesPage() {
 
   return (
     <FixedPageShell sx={{ bgcolor: miui.bg }}>
-      <Box sx={{ flexShrink: 0, mb: 1.5 }}>
+      <Box data-onboarding="explore-header" sx={{ flexShrink: 0, mb: 1.5 }}>
         <Typography
           variant="h6"
           sx={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, color: miui.text }}
@@ -116,13 +116,19 @@ export function TemplatesPage() {
 
         {templatesQuery.data &&
           !templatesQuery.isPending &&
-          sectionsToShow.map((type) => {
+          (() => {
+            let markedEnrollTarget = false;
+            return sectionsToShow.map((type) => {
             const items = grouped[type];
             if (items.length === 0) return null;
             const section = EXPLORE_SECTION_TITLES[type];
 
             return (
-              <Box key={type} sx={{ mb: 3 }}>
+              <Box
+                key={type}
+                data-onboarding={type === "STUDY_PLAN" ? "explore-study-plans" : undefined}
+                sx={{ mb: 3 }}
+              >
                 <Typography
                   sx={{
                     fontFamily: '"Space Grotesk", sans-serif',
@@ -140,12 +146,18 @@ export function TemplatesPage() {
                   {section.subtitle}
                 </Typography>
                 <Grid container spacing={1.5}>
-                  {items.map((template) => (
+                  {items.map((template) => {
+                    const enrollTarget =
+                      !markedEnrollTarget && !enrolledSlugs.has(template.slug)
+                        ? ((markedEnrollTarget = true), "explore-enroll-cta")
+                        : undefined;
+                    return (
                     <Grid key={template.id} size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
                       <ExploreScheduleCard
                         template={template}
                         enrolled={enrolledSlugs.has(template.slug)}
                         onEnroll={() => setModalTemplate(template)}
+                        onboardingTargetId={enrollTarget}
                         onPreview={
                           template.type === "TOPIC" || template.type === "STUDY_PLAN"
                             ? () => setPreviewTemplate(template)
@@ -153,11 +165,13 @@ export function TemplatesPage() {
                         }
                       />
                     </Grid>
-                  ))}
+                    );
+                  })}
                 </Grid>
               </Box>
             );
-          })}
+          });
+          })()}
       </ScrollRegion>
 
       <TopicPreviewModal

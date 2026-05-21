@@ -4,6 +4,7 @@ import type {
   PublicUser,
   RegisterResult,
 } from "@/types/api.types";
+import { parsePublicUser } from "@/utils/publicUser";
 import { api, unwrap } from "./api";
 
 export const authService = {
@@ -73,6 +74,6 @@ export const authService = {
 
   async me(): Promise<PublicUser> {
     const payload = await unwrap<{ user: PublicUser }>(api.get("/api/v1/users/me"));
-    return payload.user;
+    return parsePublicUser(payload.user);
   },
 };

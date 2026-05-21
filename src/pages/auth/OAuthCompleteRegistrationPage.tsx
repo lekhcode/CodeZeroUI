@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { OAuthProviderIcon } from "@/components/auth/OAuthProviderIcon";
 import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import { OAuthGoogleProvider } from "@/components/auth/OAuthGoogleProvider";
 import { AuthInlineError } from "@/components/auth/AuthInlineError";
@@ -14,6 +15,9 @@ import {
 } from "@/utils/oauthFlow";
 import type { PublicUser } from "@/types/api.types";
 import { useTransientAuthError } from "@/hooks/useTransientAuthError";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/hooks/queryKeys";
+import { normalizePublicUser } from "@/utils/publicUser";
 
 const GENDER_OPTIONS: Array<{ value: NonNullable<PublicUser["gender"]>; label: string }> = [
   { value: "MALE", label: "Male" },
@@ -27,6 +31,7 @@ function OAuthCompleteRegistrationInner() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
+  const queryClient = useQueryClient();
   const { error, visible, setError, clearError, showErrorFromUnknown } = useTransientAuthError({
     clearOnNavigate: false,
   });
@@ -90,7 +95,10 @@ function OAuthCompleteRegistrationInner() {
         gender,
       });
       clearOAuthPending();
-      setSession(data.user, data.accessToken);
+      const user = normalizePublicUser(data.user);
+      queryClient.removeQueries({ queryKey: queryKeys.me });
+      setSession(user, data.accessToken);
+      queryClient.setQueryData(queryKeys.me, user);
       navigate("/community", { replace: true });
     } catch (err) {
       showErrorFromUnknown(err, "Could not finish registration. Try again.");
@@ -110,10 +118,12 @@ function OAuthCompleteRegistrationInner() {
             <OnboardZeroMark3D />
           </div>
           <div className="auth-onboard__context">
-            <p className="auth-onboard__provider">Connected via {providerLabel}</p>
-            {profile.avatar ? (
-              <img src={profile.avatar} alt="" className="auth-onboard__avatar" width={40} height={40} />
-            ) : null}
+            <p className="auth-onboard__provider">
+              <span className="auth-onboard__provider-icon" aria-hidden>
+                <OAuthProviderIcon provider={profile.provider} size={18} />
+              </span>
+              Connected via {providerLabel}
+            </p>
             <p className="auth-onboard__email">{profile.email}</p>
             <p className="auth-onboard__hint">
               Your {providerLabel} email is verified. Add a few details to activate your account.

@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { ApiRequestError } from "@/services/api";
+import { queryKeys } from "@/hooks/queryKeys";
+import { normalizePublicUser } from "@/utils/publicUser";
 import {
   setPendingVerifyEmail,
   startResendCooldown,
 } from "@/utils/pendingVerification";
+import { LoginHeroScrambleText } from "@/components/auth/LoginHeroScrambleText";
 import { AppCopyright } from "@/components/layout/AppCopyright";
 import { OAuthGoogleProvider } from "@/components/auth/OAuthGoogleProvider";
 import { OAuthSignInSection } from "@/components/auth/OAuthSignInSection";
@@ -54,6 +58,7 @@ export function LoginPage() {
 function LoginPageInner() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const setSession = useAuthStore((s) => s.setSession);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const {
@@ -181,7 +186,10 @@ function LoginPageInner() {
         return;
       }
       const data = await authService.login(normalizedEmail, password);
-      setSession(data.user, data.accessToken);
+      const user = normalizePublicUser(data.user);
+      queryClient.removeQueries({ queryKey: queryKeys.me });
+      setSession(user, data.accessToken);
+      queryClient.setQueryData(queryKeys.me, user);
       const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
       const dest =
         from && from !== "/login" && !from.startsWith("/verify-email") ? from : "/community";
@@ -221,6 +229,7 @@ function LoginPageInner() {
             DSA practice with spaced revision, streak tracking, and a Brain Cache that never lets
             important problems slip.
           </p>
+          <LoginHeroScrambleText />
           <div className="login-stats">
             {[
               { num: "3,167", label: "problems", color: "var(--text-1)" },

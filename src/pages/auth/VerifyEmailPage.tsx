@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link as RouterLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { OtpVerificationExperience } from "@/components/auth/OtpVerificationExperience";
 import { authService } from "@/services/auth.service";
@@ -10,6 +11,8 @@ import {
   startResendCooldown,
 } from "@/utils/pendingVerification";
 import { miui } from "@/theme/theme";
+import { queryKeys } from "@/hooks/queryKeys";
+import { normalizePublicUser } from "@/utils/publicUser";
 
 const DEFAULT_COOLDOWN = 60;
 
@@ -18,6 +21,7 @@ export function VerifyEmailPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const setSession = useAuthStore((s) => s.setSession);
+  const queryClient = useQueryClient();
 
   const queryEmail = searchParams.get("email")?.trim().toLowerCase() ?? "";
   const storedEmail = getPendingVerifyEmail();
@@ -63,7 +67,10 @@ export function VerifyEmailPage() {
       onVerify={async (code) => {
         const result = await authService.verifyEmail(email, code);
         clearPendingVerifyEmail();
-        setSession(result.user, result.accessToken);
+        const user = normalizePublicUser(result.user);
+        queryClient.removeQueries({ queryKey: queryKeys.me });
+        setSession(user, result.accessToken);
+        queryClient.setQueryData(queryKeys.me, user);
         window.setTimeout(() => navigate(from, { replace: true }), 600);
       }}
       onResend={async () => {

@@ -132,7 +132,7 @@ export function TodayPage() {
         >
           <ArrowBackIosNewRoundedIcon sx={{ fontSize: 16 }} />
         </Button>
-        <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Box data-onboarding="today-queue" sx={{ minWidth: 0, flex: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
             Today
           </Typography>

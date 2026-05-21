@@ -32,6 +32,7 @@ import { miui } from "@/theme/theme";
 import { queryKeys } from "@/hooks/queryKeys";
 import type { PublicUser } from "@/types/api.types";
 import dayjs from "dayjs";
+import { useReplayOnboarding } from "@/onboarding/OnboardingProvider";
 
 const GENDER_OPTIONS: Array<{ value: NonNullable<PublicUser["gender"]>; label: string }> = [
   { value: "MALE", label: "Male" },
@@ -386,6 +387,27 @@ function SecuritySection() {
   );
 }
 
+function HelpSection() {
+  const replayOnboarding = useReplayOnboarding();
+
+  return (
+    <SettingsSection title="Product tour">
+      <Stack spacing={2} sx={{ maxWidth: 420 }}>
+        <Typography sx={{ fontSize: "0.875rem", color: miui.textMuted, lineHeight: 1.6 }}>
+          Replay the guided walkthrough through Explore, schedules, daily practice, and Brain Cache.
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={replayOnboarding}
+          sx={{ borderRadius: 0, alignSelf: "flex-start", textTransform: "none" }}
+        >
+          Replay walkthrough
+        </Button>
+      </Stack>
+    </SettingsSection>
+  );
+}
+
 function AccountSection() {
   const logout = useLogout();
 
@@ -453,6 +475,7 @@ export function SettingsPage() {
         <Tab label="Profile" />
         <Tab label="Security" />
         <Tab label="Account" />
+        <Tab label="Help" />
         <Tab label="Preferences" disabled />
       </Tabs>
 
@@ -460,7 +483,8 @@ export function SettingsPage() {
         {tab === 0 && <ProfileSection />}
         {tab === 1 && <SecuritySection />}
         {tab === 2 && <AccountSection />}
-        {tab === 3 && (
+        {tab === 3 && <HelpSection />}
+        {tab === 4 && (
           <Typography sx={{ py: 3, fontSize: "0.875rem", color: miui.textDim }}>
             Preferences coming soon.
           </Typography>

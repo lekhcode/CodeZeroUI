@@ -4,6 +4,8 @@ import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { tokenStorage } from "@/utils/storage";
 import { queryKeys } from "./queryKeys";
+import { useOnboardingStore } from "@/onboarding/onboardingStore";
+import { normalizePublicUser } from "@/utils/publicUser";
 import { ApiRequestError } from "@/services/api";
 import {
   setPendingVerifyEmail,
@@ -16,10 +18,12 @@ export function useMe(enabled = true) {
 
   return useQuery({
     queryKey: queryKeys.me,
-    queryFn: authService.me,
+    queryFn: () => authService.me(),
     enabled: enabled && Boolean(tokenStorage.get()),
     retry: false,
-    staleTime: 5 * 60_000,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
     meta: { onUnauthorized: logout },
   });
 }
@@ -44,8 +48,10 @@ export function useLogin() {
       authService.login(email, password),
     onSuccess: (data) => {
       clearPendingVerifyEmail();
-      setSession(data.user, data.accessToken);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.me });
+      const user = normalizePublicUser(data.user);
+      queryClient.removeQueries({ queryKey: queryKeys.me });
+      setSession(user, data.accessToken);
+      queryClient.setQueryData(queryKeys.me, user);
       navigate(resolvePostAuthPath(location), { replace: true });
     },
     onError: (error: Error, variables) => {
@@ -99,8 +105,9 @@ export function useLogout() {
         await authService.logout();
       }
     } catch {
-      /* still clear local session */
+      /* still clear client session */
     }
+    useOnboardingStore.getState().end();
     clearPendingVerifyEmail();
     logoutStore();
     queryClient.clear();

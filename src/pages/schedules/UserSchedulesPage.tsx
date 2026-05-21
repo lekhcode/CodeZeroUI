@@ -178,7 +178,7 @@ export function UserSchedulesPage() {
           flexWrap: "wrap",
         }}
       >
-        <Box>
+        <Box data-onboarding="schedules-header">
           <Typography
             variant="h4"
             sx={{
