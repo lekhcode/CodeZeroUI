@@ -5,7 +5,6 @@ import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { getAuthErrorMessage } from "@/utils/authErrors";
 import { applyOAuthAuthResult } from "@/utils/handleOAuthResult";
-import { performOAuthGithubExchange } from "@/utils/performOAuthGithub";
 import {
   persistGithubCodeIntent,
   resolveGithubOAuthIntent,
@@ -136,7 +135,7 @@ export function GitHubCallbackPage() {
       }
 
       try {
-        const data = await performOAuthGithubExchange(code, getGithubRedirectUri(), intent);
+        const data = await authService.githubExchange(code, getGithubRedirectUri(), intent);
         persistGithubResult(code, data);
         applyResult(data);
       } catch (err) {

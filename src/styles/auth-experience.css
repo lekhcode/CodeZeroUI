@@ -2,58 +2,364 @@
 
 .auth-shell--onboard {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: stretch;
   justify-content: center;
   background: var(--bg-base);
   padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.auth-shell--onboard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 90% 70% at 38% 42%,
+    color-mix(in srgb, var(--bg-surface) 12%, transparent) 0%,
+    transparent 62%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 .auth-onboard {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, min(420px, 40vw));
   width: 100%;
-  max-width: 880px;
+  max-width: none;
   min-height: 100vh;
-  margin: 0 auto;
+  min-height: 100dvh;
+  margin: 0;
   animation: auth-fade-in 0.35s ease;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .auth-onboard {
     grid-template-columns: 1fr;
-    max-width: 420px;
+    max-width: 440px;
+    margin: 0 auto;
   }
 
-  .auth-onboard__aside {
+  .auth-onboard__visual {
     display: none;
   }
 }
 
-.auth-onboard__aside {
+.auth-onboard__visual {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 40px 36px;
-  border-right: 1px solid var(--border);
-  background: var(--bg-surface);
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  padding: clamp(40px, 6vw, 72px) clamp(28px, 5vw, 48px);
+  overflow: hidden;
+  background: transparent;
+}
+
+.auth-onboard__visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(107, 114, 128, 0.22) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 0%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-onboard__visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 55%,
+    color-mix(in srgb, var(--bg-base) 70%, transparent) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-onboard__mark-wrap {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: min(50vh, 460px);
 }
 
 .auth-onboard__brand {
+  position: relative;
+  z-index: 2;
+  align-self: flex-start;
   font-family: "Syne", sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: var(--text-1);
+  color: var(--text-2);
 }
 
 .auth-onboard__brand span {
   color: var(--text-3);
 }
 
+/* ── 3D `{0}` mark — layered extrusion, lit Google ring ── */
+.onboard-mark-3d {
+  --g-blue: #4d9fff;
+  --g-red: #ff5a50;
+  --g-yellow: #ffd24a;
+  --g-green: #3ee88a;
+  --g-extrude: #14181f;
+  --brace-face: color-mix(in srgb, #d1d7e0 78%, #9aa3b2);
+  --brace-side: #3d4552;
+
+  position: relative;
+  width: min(340px, 68vw);
+  height: min(340px, 68vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboard-mark-3d__fog {
+  position: absolute;
+  inset: -20% -10%;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 58%,
+    color-mix(in srgb, var(--bg-surface) 22%, transparent) 0%,
+    transparent 68%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.onboard-mark-3d__ambient {
+  position: absolute;
+  inset: -8%;
+  background: radial-gradient(
+    circle at 48% 42%,
+    color-mix(in srgb, var(--g-blue) 16%, transparent) 0%,
+    transparent 58%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.onboard-mark-3d__highlight {
+  position: absolute;
+  inset: 5% 10% 35% 5%;
+  background: radial-gradient(
+    ellipse 55% 45% at 38% 32%,
+    color-mix(in srgb, #fff 7%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.onboard-mark-3d__floor {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 8%;
+  height: 28%;
+  background: radial-gradient(
+    ellipse 80% 40% at 50% 0%,
+    color-mix(in srgb, #000 28%, transparent) 0%,
+    transparent 72%
+  );
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.onboard-mark-3d__stage {
+  position: relative;
+  z-index: 1;
+  perspective: 760px;
+  perspective-origin: 50% 46%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboard-mark-3d__rig {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  transform: rotateX(16deg) rotateY(-26deg);
+  animation:
+    onboard-mark-orbit 36s linear infinite,
+    onboard-mark-float 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Single horizontal glyph row: { 0 } */
+.onboard-mark-3d__word {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1em;
+  transform-style: preserve-3d;
+  transform: translateZ(12px);
+}
+
+/* Braces — stacked extrusion layers + lit face */
+.onboard-mark-3d__brace-stack {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transform-style: preserve-3d;
+}
+
+.onboard-mark-3d__brace {
+  font-family: "Fira Code", ui-monospace, monospace;
+  font-size: clamp(4.5rem, 14.5vw, 6.75rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+}
+
+.onboard-mark-3d__brace--e3 {
+  position: absolute;
+  color: color-mix(in srgb, var(--brace-side) 90%, #000);
+  transform: translate3d(4px, 5px, -10px);
+  opacity: 0.55;
+}
+
+.onboard-mark-3d__brace--e2 {
+  position: absolute;
+  color: var(--brace-side);
+  transform: translate3d(2px, 3px, -5px);
+  opacity: 0.72;
+}
+
+.onboard-mark-3d__brace--e1 {
+  position: absolute;
+  color: color-mix(in srgb, var(--brace-side) 70%, var(--brace-face));
+  transform: translate3d(1px, 1.5px, -2px);
+  opacity: 0.88;
+}
+
+.onboard-mark-3d__brace--face {
+  position: relative;
+  display: inline-block;
+  color: var(--brace-face);
+  transform: translateZ(0);
+  text-shadow:
+    0 -1px 0 color-mix(in srgb, #fff 18%, transparent),
+    0 2px 4px color-mix(in srgb, #000 42%, transparent),
+    0 6px 14px color-mix(in srgb, #000 22%, transparent);
+}
+
+.onboard-mark-3d__zero {
+  position: relative;
+  flex-shrink: 0;
+  width: clamp(5rem, 15.5vw, 7.5rem);
+  height: clamp(5rem, 15.5vw, 7.5rem);
+  margin: 0 -0.02em;
+  transform: translateZ(0) scaleX(0.94) scaleY(1.06);
+  transform-style: preserve-3d;
+}
+
+.onboard-mark-3d__zero-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.onboard-mark-3d__zero-svg--face {
+  z-index: 2;
+}
+
+.onboard-mark-3d__zero-svg--extrude {
+  z-index: 0;
+}
+
+.onboard-mark-3d__extrude .onboard-mark-3d__arc {
+  stroke: var(--g-extrude);
+}
+
+.onboard-mark-3d__zero-void {
+  opacity: 1;
+}
+
+.onboard-mark-3d__zero-inner-rim {
+  fill: none;
+  stroke: color-mix(in srgb, #fff 8%, transparent);
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+.onboard-mark-3d__zero-spec {
+  fill: none;
+  stroke: color-mix(in srgb, #fff 35%, transparent);
+  stroke-linecap: round;
+  opacity: 0.45;
+  transform: translate(-0.75px, -1px);
+}
+
+.onboard-mark-3d__arc {
+  transform-origin: 36px 36px;
+  stroke-linecap: round;
+  fill: none;
+}
+
+@keyframes onboard-mark-orbit {
+  from {
+    transform: rotateX(16deg) rotateY(-26deg);
+  }
+  to {
+    transform: rotateX(16deg) rotateY(334deg);
+  }
+}
+
+@keyframes onboard-mark-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboard-mark-3d__rig {
+    animation: none;
+    transform: rotateX(16deg) rotateY(-26deg);
+  }
+}
+
 .auth-onboard__context {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 300px;
   margin-top: auto;
-  padding-top: 48px;
+  padding-top: 32px;
 }
 
 .auth-onboard__provider {
@@ -84,9 +390,40 @@
 }
 
 .auth-onboard__main {
-  padding: 40px 32px 32px;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  padding: clamp(36px, 5vh, 52px) clamp(28px, 4vw, 44px);
+  background: transparent;
+  border-left: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.auth-onboard__main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--bg-surface) 5%, transparent) 10%,
+    color-mix(in srgb, var(--bg-surface) 16%, var(--bg-base)) 38%,
+    color-mix(in srgb, var(--bg-surface) 28%, var(--bg-base)) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-onboard__main-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
 }
 
 .auth-onboard__title {
@@ -113,6 +450,17 @@
   border: 1px solid var(--border-mid);
   object-fit: cover;
   margin-bottom: 16px;
+}
+
+/* Native select menus — match dark onboarding surface */
+.auth-onboard {
+  color-scheme: dark;
+}
+
+.auth-onboard__form select,
+.auth-onboard__form select option {
+  background-color: var(--bg-elevated);
+  color: var(--text-1);
 }
 
 .auth-onboard__form {
@@ -157,7 +505,7 @@
 }
 
 .auth-field input,
-.auth-field select {
+.auth-field select:not(.auth-country-select) {
   height: 38px;
   padding: 0 12px;
   border: 1px solid var(--border-mid);
@@ -177,12 +525,12 @@
 }
 
 .auth-field input:focus,
-.auth-field select:focus {
+.auth-field select:not(.auth-country-select):focus {
   border-color: var(--border-focus);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.auth-field select {
+.auth-field select:not(.auth-country-select) {
   cursor: pointer;
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%),
@@ -195,6 +543,106 @@
     5px 5px;
   background-repeat: no-repeat;
   padding-right: 28px;
+}
+
+/* Country select — single surface: [flag] Country name ▼ */
+.auth-field--country .auth-country-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.auth-field--country .auth-country-select-wrap:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.auth-country-select__flag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  min-width: 22px;
+  height: 16px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.auth-country-flag-img {
+  display: block;
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 1px;
+  opacity: 0.92;
+}
+
+.auth-country-select__globe {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.auth-field--country .auth-country-select {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 22px 0 0;
+  border: none;
+  border-radius: 0;
+  background-color: var(--bg-elevated);
+  box-shadow: none;
+  color: var(--text-1);
+  color-scheme: dark;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 38px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%),
+    linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+  background-position:
+    100% 16px,
+    calc(100% - 5px) 16px;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  text-overflow: ellipsis;
+}
+
+.auth-field--country .auth-country-select:focus {
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.auth-field--country label {
+  margin-bottom: 0;
+}
+
+.auth-field--country .auth-country-select option {
+  background-color: var(--bg-elevated);
+  color: var(--text-1);
+}
+
+.auth-field--country .auth-country-select option:checked,
+.auth-field--country .auth-country-select option:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-1);
 }
 
 .auth-inline-error {
