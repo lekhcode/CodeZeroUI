@@ -179,7 +179,7 @@ export function DashboardPage() {
   return (
     <PageContainer className={FLUENT_PAGE.dashboard} sx={{ maxWidth: "100%" }}>
       <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
-        <Grid size={{ xs: 12, xl: 9 }}>
+        <Grid size={{ xs: 12, lg: 9 }} sx={{ minWidth: 0 }}>
       <Box sx={{ contain: "layout style", minWidth: 0 }}>
           <AnimatedBanner
             static
@@ -481,7 +481,7 @@ export function DashboardPage() {
       </Box>
         </Grid>
 
-        <Grid size={{ xs: 12, xl: 3 }} sx={{ display: "flex", minWidth: 0 }}>
+        <Grid size={{ xs: 12, lg: 3 }} sx={{ display: "flex", minWidth: 0 }}>
           <DashboardLeaderboard />
         </Grid>
       </Grid>
