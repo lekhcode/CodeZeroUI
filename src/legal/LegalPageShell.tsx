@@ -22,7 +22,7 @@ export function LegalPageShell({ meta }: LegalPageShellProps) {
   }, [meta.title]);
 
   return (
-    <Box className="legal-page">
+    <Box className="legal-page app-scroll">
       <header className="legal-page__header">
         <Box className="legal-page__header-inner">
           <CodeZeroBrandLink size={32} compact to="/login" />
