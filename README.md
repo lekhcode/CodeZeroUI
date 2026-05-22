@@ -10,7 +10,28 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 
+**Organization:** LoopCode · **Created by:** Lekh Ray  
+**Contact:** [whiletrue.codes@gmail.com](mailto:whiletrue.codes@gmail.com)
+
 </div>
+
+---
+
+## Ownership & Legal
+
+| | |
+|---|---|
+| **Platform** | CodeZero — premium DSA training (schedules, spaced revision, Brain Cache, modern auth) |
+| **Organization** | LoopCode |
+| **Creator / CEO** | Lekh Ray |
+| **Copyright** | © 2026 LoopCode. All rights reserved. |
+| **License** | Proprietary — see [LICENSE](./LICENSE) |
+| **Privacy** | `/privacy` |
+| **Terms** | `/terms` |
+| **Security** | `/security` — reports to [whiletrue.codes@gmail.com](mailto:whiletrue.codes@gmail.com) |
+| **Legal notice** | `/legal` |
+
+Built and maintained by **LoopCode**. This frontend repository is proprietary intellectual property. You may view and evaluate the codebase for professional review; redistribution, commercial reuse, rebranding, and competing deployments are not permitted without written authorization from LoopCode.
 
 ---
 
@@ -415,13 +436,18 @@ Open **http://localhost:5173** — dev requests proxy to `http://localhost:2026`
 
 ### Environment
 
-Copy `.env.example` to `.env` when deploying against a non-local API:
+Copy `.env.example` to `.env` when deploying against a non-local API. **Never commit `.env`** or paste OAuth client secrets, API keys, or private URLs into the repository.
 
 ```env
+# Public API origin only (production)
 VITE_API_BASE_URL=https://your-api.example.com
+
+# Public OAuth client IDs only — secrets stay on the backend
+# VITE_GOOGLE_CLIENT_ID=
+# VITE_GITHUB_CLIENT_ID=
 ```
 
-Leave empty in development to use the Vite `/api` proxy.
+Leave `VITE_API_BASE_URL` empty in development to use the Vite `/api` proxy. See `.env.example` for the full template and safety notes.
 
 ---
 
@@ -443,5 +469,9 @@ The architecture (query-key domains, feature modules, lazy routes) is built to a
 **CodeZero** — structure your reps. Protect your patterns. Ship interview confidence as a habit.
 
 *Built with intent. Engineered for daily use.*
+
+© 2026 **LoopCode** · Created by **Lekh Ray**
+
+[Privacy](/privacy) · [Terms](/terms) · [Security](/security) · [License](/legal) · [LICENSE](./LICENSE)
 
 </div>

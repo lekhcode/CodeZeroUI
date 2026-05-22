@@ -6,6 +6,8 @@ import { miui } from "@/theme/theme";
 type CodeZeroBrandLinkProps = {
   size?: number;
   compact?: boolean;
+  /** Destination when the mark is clicked (default: community hub). */
+  to?: string;
   onClick?: () => void;
   sx?: SxProps<Theme>;
 };
@@ -13,13 +15,14 @@ type CodeZeroBrandLinkProps = {
 export function CodeZeroBrandLink({
   size = 36,
   compact = false,
+  to = "/community",
   onClick,
   sx,
 }: CodeZeroBrandLinkProps) {
   return (
     <Box
       component={Link}
-      to="/community"
+      to={to}
       onClick={onClick}
       className="zero-mark-spin-host"
       aria-label="CodeZero — community"
