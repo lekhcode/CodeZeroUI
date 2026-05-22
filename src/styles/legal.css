@@ -1,7 +1,15 @@
 /* Legal & compliance pages — docs-grade minimal layout (Linear / Vercel inspired) */
 
 .legal-page {
-  min-height: 100dvh;
+  /* Body is overflow:hidden app-wide — legal routes need their own scroll region */
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   background: var(--bg, #0a0b0d);
