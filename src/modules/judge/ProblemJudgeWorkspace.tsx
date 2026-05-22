@@ -45,6 +45,8 @@ import type {
   SubmissionStatus,
 } from "@/types/judge.types";
 import { judgeService } from "@/services/judge.service";
+import { CommunityRuntimeConfigPanel } from "@/modules/judge/communityRuntime/CommunityRuntimeConfigPanel";
+import { judgeUi } from "@/modules/judge/judgeWorkspaceUi";
 import { useAuthStore } from "@/store/authStore";
 import { learningProgressKeyPrefixes, queryKeys } from "@/hooks/queryKeys";
 import { useJudgeCodingTimer, formatSolveDuration } from "@/hooks/useJudgeCodingTimer";
@@ -643,13 +645,13 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
           </Typography>
           <Stack spacing={1.25}>
             {problem.examples.map((ex, i) => (
-              <Paper
+              <Box
                 key={i}
-                variant="outlined"
                 sx={{
-                  p: 1.25,
-                  bgcolor: alpha("#4f46e5", 0.05),
-                  borderColor: alpha("#4f46e5", 0.12),
+                  p: 1,
+                  borderRadius: judgeUi.panelRadius,
+                  border: `1px solid ${judgeUi.hairline}`,
+                  bgcolor: alpha("#fff", 0.02),
                   fontFamily: "ui-monospace, monospace",
                   fontSize: 12,
                 }}
@@ -666,7 +668,7 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
                     {ex.explanation}
                   </Typography>
                 )}
-              </Paper>
+              </Box>
             ))}
           </Stack>
         </Box>
@@ -744,7 +746,7 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
           <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>
             Submit history
           </Typography>
-          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
+          <TableContainer component={Paper} variant="outlined" elevation={0} sx={{ borderRadius: judgeUi.panelRadius, borderColor: judgeUi.hairline }}>
             <Table size="small" sx={{ "& th": { fontWeight: 700, bgcolor: alpha("#6366f1", 0.06) } }}>
               <TableHead>
                 <TableRow>
@@ -833,7 +835,7 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
       <Box
         sx={{
           mb: 1.25,
-          borderRadius: 1.5,
+          borderRadius: judgeUi.panelRadius,
           border: `1px solid ${sampleStatusAccent}`,
           bgcolor: alpha("#0d1117", 0.6),
           overflow: "hidden",
@@ -846,8 +848,8 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
             py: 0.75,
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottom: `1px solid ${alpha("#fff", 0.06)}`,
-            bgcolor: alpha("#161b22", 0.5),
+            borderBottom: `1px solid ${judgeUi.hairline}`,
+            bgcolor: alpha("#161b22", 0.4),
           }}
         >
           <Typography sx={{ fontWeight: 800, fontSize: 12, color: alpha("#fff", 0.82), letterSpacing: "0.04em" }}>
@@ -1110,20 +1112,28 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
         >
           <Paper
             variant="outlined"
+            elevation={0}
             sx={{
               height: "100%",
-              borderRadius: 2,
+              borderRadius: judgeUi.panelRadius,
               bgcolor: "background.paper",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
               minHeight: 0,
+              borderColor: judgeUi.hairlineStrong,
             }}
           >
             <Tabs
               value={leftTab}
               onChange={(_, v) => setLeftTab(v as LeftTab)}
-              sx={{ borderBottom: 1, borderColor: "divider", px: 1, flexShrink: 0 }}
+              sx={{
+                borderBottom: `1px solid`,
+                borderColor: judgeUi.hairlineStrong,
+                minHeight: 36,
+                px: 1,
+                flexShrink: 0,
+              }}
               variant="fullWidth"
             >
               <Tab value="description" label="Description" sx={{ textTransform: "none", fontWeight: 700 }} />
@@ -1149,11 +1159,11 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
         <Separator
           id="statement-workspace"
           style={{
-            width: 12,
-            minWidth: 12,
-            margin: "0 4px",
-            borderRadius: 4,
-            background: "rgba(148, 163, 184, 0.25)",
+            width: 5,
+            minWidth: 5,
+            margin: "0 2px",
+            borderRadius: 1,
+            background: "rgba(148, 163, 184, 0.2)",
             cursor: "col-resize",
           }}
         />
@@ -1173,8 +1183,8 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              borderRadius: 2,
-              border: `1px solid ${alpha("#fff", 0.08)}`,
+              borderRadius: judgeUi.panelRadius,
+              border: `1px solid ${judgeUi.hairlineStrong}`,
               bgcolor: "#0d1117",
               color: "#e6edf3",
               minHeight: 0,
@@ -1191,16 +1201,24 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
               />
             )}
 
+            <CommunityRuntimeConfigPanel
+              problemId={judgeMeta.problemId}
+              slug={slug}
+              problemTitle={problem.title}
+              judgeMeta={judgeMeta}
+              isAuthenticated={isAuthenticated}
+            />
+
             <Stack
               direction="row"
               spacing={1}
               sx={{
                 alignItems: "center",
-                px: 1.5,
-                py: 1,
-                borderBottom: `1px solid ${alpha("#fff", 0.08)}`,
+                px: 1.25,
+                py: 0.65,
+                borderBottom: `1px solid ${judgeUi.hairline}`,
                 flexWrap: "wrap",
-                gap: 1,
+                gap: 0.75,
                 flexShrink: 0,
               }}
             >
@@ -1210,12 +1228,8 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
                 displayEmpty
                 disabled={locked || readyLanguages.length === 0}
                 onChange={onLanguageChange}
-                sx={{
-                  minWidth: 136,
-                  color: "#e6edf3",
-                  "& .MuiOutlinedInput-notchedOutline": { borderColor: alpha("#fff", 0.15) },
-                  "& .MuiSvgIcon-root": { color: alpha("#fff", 0.5) },
-                }}
+                MenuProps={{ slotProps: { paper: { sx: judgeUi.menuPaper } } }}
+                sx={judgeUi.select}
                 renderValue={(v) =>
                   v === "" ? "Language" : COMPILER_LANGUAGES.find((l) => l.id === v)?.label ?? v
                 }
@@ -1265,7 +1279,9 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
                     sx={{
                       color: alpha("#fff", 0.8),
                       border: `1px solid ${alpha("#fff", 0.15)}`,
-                      borderRadius: 1,
+                      borderRadius: 0.5,
+                      width: 28,
+                      height: 28,
                     }}
                     aria-label="Format code"
                   >
@@ -1283,12 +1299,7 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
                 variant="outlined"
                 disabled={locked || busy || language === null || !isAuthenticated}
                 onClick={() => void startJudge("run")}
-                sx={{
-                  color: alpha("#fff", 0.88),
-                  borderColor: alpha("#fff", 0.22),
-                  textTransform: "none",
-                  fontWeight: 600,
-                }}
+                sx={judgeUi.runBtn}
               >
                 {busy && submission === null ? <CircularProgress size={14} sx={{ mr: 0.5 }} /> : null}
                 Run
@@ -1297,11 +1308,11 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
               <Button
                 size="small"
                 variant="contained"
-                className="solve-btn btn-primary"
+                className="solve-btn"
                 disabled={locked || busy || language === null || !isAuthenticated}
                 onClick={() => void startJudge("submit")}
                 onMouseMove={handleSolveButtonMouseMove}
-                sx={{ textTransform: "none", fontWeight: 800, bgcolor: "#238636", "&:hover": { bgcolor: "#2ea043" } }}
+                sx={judgeUi.submitBtn}
               >
                 Submit
               </Button>
@@ -1392,11 +1403,11 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
               <Separator
                 id={`judge-${slug}-editor-output-sep`}
                 style={{
-                  height: 12,
-                  minHeight: 12,
-                  margin: "2px 10px",
-                  borderRadius: 4,
-                  background: "rgba(148, 163, 184, 0.28)",
+                  height: 6,
+                  minHeight: 6,
+                  margin: "1px 8px",
+                  borderRadius: 1,
+                  background: "rgba(148, 163, 184, 0.22)",
                   cursor: "row-resize",
                   flexShrink: 0,
                   display: "flex",
