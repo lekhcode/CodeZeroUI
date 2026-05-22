@@ -2,7 +2,7 @@ import { Box, Container } from "@mui/material";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CodeZeroBrandLink } from "@/components/brand/CodeZeroBrandLink";
-import { AppCopyright } from "@/components/layout/AppCopyright";
+import { AppLegalFooter } from "@/components/layout/AppLegalFooter";
 import { miui } from "@/theme/theme";
 
 export function AuthLayout() {
@@ -30,8 +30,8 @@ export function AuthLayout() {
             <Outlet />
           </Box>
         </motion.div>
-        <Box sx={{ mt: 2, px: 2 }}>
-          <AppCopyright align="center" />
+        <Box sx={{ mt: 2, px: 2, pb: 2 }}>
+          <AppLegalFooter variant="inline" align="center" />
         </Box>
       </Container>
     </Box>

@@ -19,6 +19,10 @@ import {
   TemplatesPage,
   TodayPage,
   UserSchedulesPage,
+  PrivacyPolicyPage,
+  TermsOfServicePage,
+  SecurityPage,
+  LegalNoticePage,
 } from "@/routes/lazyPages";
 import { GitHubCallbackPage } from "@/pages/auth/GitHubCallbackPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
@@ -40,6 +44,39 @@ export function AppRouter() {
         <Route path="/auth/github/success" element={<GitHubCallbackPage />} />
 
         <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/privacy"
+          element={
+            <Lazy>
+              <PrivacyPolicyPage />
+            </Lazy>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <Lazy>
+              <TermsOfServicePage />
+            </Lazy>
+          }
+        />
+        <Route
+          path="/security"
+          element={
+            <Lazy>
+              <SecurityPage />
+            </Lazy>
+          }
+        />
+        <Route
+          path="/legal"
+          element={
+            <Lazy>
+              <LegalNoticePage />
+            </Lazy>
+          }
+        />
 
         <Route element={<GuestRoute />}>
           <Route element={<AuthLayout />}>
