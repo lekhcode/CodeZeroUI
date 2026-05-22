@@ -40,15 +40,3 @@ export const ProblemDetailPage = lazy(() =>
 export const SettingsPage = lazy(() =>
   import("@/pages/settings/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 );
-export const PrivacyPolicyPage = lazy(() =>
-  import("@/pages/legal/PrivacyPolicyPage").then((m) => ({ default: m.PrivacyPolicyPage })),
-);
-export const TermsOfServicePage = lazy(() =>
-  import("@/pages/legal/TermsOfServicePage").then((m) => ({ default: m.TermsOfServicePage })),
-);
-export const SecurityPage = lazy(() =>
-  import("@/pages/legal/SecurityPage").then((m) => ({ default: m.SecurityPage })),
-);
-export const LegalNoticePage = lazy(() =>
-  import("@/pages/legal/LegalNoticePage").then((m) => ({ default: m.LegalNoticePage })),
-);

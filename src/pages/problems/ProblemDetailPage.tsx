@@ -42,11 +42,11 @@ function ProblemTitleRow(props: {
       sx={{
         flexWrap: "wrap",
         alignItems: "center",
-        mb: 0.75,
+        mb: 0.5,
         flexShrink: 0,
       }}
     >
-      <Typography variant="h6" component="h1" sx={{ fontWeight: 800, lineHeight: 1.3 }}>
+      <Typography variant="h6" component="h1" sx={{ fontWeight: 800, lineHeight: 1.25, fontSize: { xs: "1rem", sm: "1.125rem" } }}>
         {title}
       </Typography>
       <DifficultyChip difficulty={difficulty} />
@@ -151,9 +151,15 @@ export function ProblemDetailPage() {
             <BrainCacheProblemPanel problemId={judgeQuery.data.problemId} slug={slug} />
           ) : null}
 
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", mb: 0.75, flexShrink: 0 }}>
+          <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", mb: 0.5, flexShrink: 0, gap: 0.5 }}>
             {detailQuery.data.topics.map((t) => (
-              <Chip key={t} label={t} size="small" variant="outlined" />
+              <Chip
+                key={t}
+                label={t}
+                size="small"
+                variant="outlined"
+                sx={{ height: 22, fontSize: 11, borderRadius: 0.5 }}
+              />
             ))}
           </Stack>
 

@@ -11,7 +11,7 @@ import {
   startResendCooldown,
 } from "@/utils/pendingVerification";
 import { LoginHeroScrambleText } from "@/components/auth/LoginHeroScrambleText";
-import { AppLegalFooter } from "@/components/layout/AppLegalFooter";
+import { AppCopyright } from "@/components/layout/AppCopyright";
 import { OAuthGoogleProvider } from "@/components/auth/OAuthGoogleProvider";
 import { OAuthSignInSection } from "@/components/auth/OAuthSignInSection";
 import { AuthInlineError } from "@/components/auth/AuthInlineError";
@@ -337,9 +337,9 @@ function LoginPageInner() {
             </button>
           </p>
 
-          <div className="login-copyright">
-            <AppLegalFooter variant="inline" align="center" />
-          </div>
+          <p className="login-copyright">
+            <AppCopyright align="center" />
+          </p>
         </div>
       </section>
     </div>

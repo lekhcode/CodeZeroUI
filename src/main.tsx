@@ -5,7 +5,6 @@ import "@/styles/global.css";
 import "@/styles/login.css";
 import "@/styles/auth-experience.css";
 import "@/styles/animations.css";
-import "@/styles/legal.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
