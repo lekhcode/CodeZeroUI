@@ -82,6 +82,13 @@ export const brainCacheService = {
     return data.revisions;
   },
 
+  async solvedTodayRevisions(): Promise<BrainCacheRevisionTask[]> {
+    const data = await unwrap<{ revisions: BrainCacheRevisionTask[] }>(
+      api.get("/api/v1/brain-cache/revisions/solved-today"),
+    );
+    return data.revisions;
+  },
+
   completeRevision(id: string) {
     return unwrap<{ revision: BrainCacheRevisionTask }>(
       api.patch(`/api/v1/brain-cache/revisions/${id}/complete`),

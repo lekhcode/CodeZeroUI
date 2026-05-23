@@ -30,6 +30,8 @@ export const queryKeys = {
   brainCacheToday: (dateKey = getUtcDateKey()) => ["brain-cache", "revisions", "today", dateKey] as const,
   brainCacheOverdue: (dateKey = getUtcDateKey()) =>
     ["brain-cache", "revisions", "overdue", dateKey] as const,
+  brainCacheSolvedToday: (dateKey = getUtcDateKey()) =>
+    ["brain-cache", "revisions", "solved-today", dateKey] as const,
   brainCacheAnalytics: ["brain-cache", "analytics"] as const,
   brainCacheMemberships: (slug: string) => ["brain-cache", "memberships", slug] as const,
   brainCachePlaylistProblems: (playlistId: string) =>
@@ -40,6 +42,12 @@ export const queryKeys = {
     ["auto-revisions", "week", weekOffset, timezone] as const,
   autoRevisionMonth: (monthOffset: number, timezone: string) =>
     ["auto-revisions", "month", monthOffset, timezone] as const,
+  autoRevisionFeed: (filters: Record<string, unknown>, timezone: string) =>
+    ["auto-revisions", "feed", filters, timezone] as const,
+  autoRevisionHistory: (filters: Record<string, unknown>, timezone: string) =>
+    ["auto-revisions", "history", filters, timezone] as const,
+  autoRevisionActivity: (months: number, timezone: string) =>
+    ["auto-revisions", "activity", months, timezone] as const,
   dueCalendarSummary: (year: number, monthIndex: number) =>
     [...dueCalendarSummaryPrefix, year, monthIndex] as const,
   dueCalendarSummaryWeek: (weekStart: string) =>
