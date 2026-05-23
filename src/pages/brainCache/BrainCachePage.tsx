@@ -3,11 +3,9 @@ import { Badge, Box, Button, Stack, Typography } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FixedPageShell, ScrollRegion } from "@/components/layout/FixedPageShell";
-import { SectionCard } from "@/components/ui/SectionCard";
-import { BrainCacheHero } from "@/components/brainCache/BrainCacheHero";
-import { BrainCachePlaylistExplorer } from "@/components/brainCache/BrainCachePlaylistExplorer";
+import { BrainCachePlaylistSection } from "@/components/brainCache/BrainCachePlaylistSection";
 import { BrainCachePlaylistDialog } from "@/components/brainCache/BrainCachePlaylistDialog";
-import { BrainCacheRevisionsPanel } from "@/components/brainCache/BrainCacheRevisionsPanel";
+import { BrainCacheRevisionQueue } from "@/components/brainCache/BrainCacheRevisionQueue";
 import { SmartRevisionsTab } from "@/components/smartRevisions/SmartRevisionsTab";
 import { brainCacheService } from "@/services/brainCache.service";
 import { autoRevisionService } from "@/services/autoRevision.service";
@@ -19,15 +17,14 @@ import {
   queryKeys,
 } from "@/hooks/queryKeys";
 import { FLUENT_PAGE } from "@/theme/fluentScroll";
-import { getUtcDateKey } from "@/utils/date";
 import { getClientTimezone } from "@/utils/timezone";
-import { dashNavTabSx, miui, sectionContentSx } from "@/theme/theme";
+import { dashNavTabSx, miui } from "@/theme/theme";
+import panel from "@/components/RevisionPanel/RevisionPanel.module.css";
 
 type BrainCacheSection = "playlists" | "smart";
 
 export function BrainCachePage() {
   const queryClient = useQueryClient();
-  const todayKey = getUtcDateKey();
   const tz = getClientTimezone();
   const [section, setSection] = useState<BrainCacheSection>("playlists");
   const [createOpen, setCreateOpen] = useState(false);
@@ -35,23 +32,6 @@ export function BrainCachePage() {
   const playlistsQuery = useQuery({
     queryKey: queryKeys.brainCachePlaylists,
     queryFn: brainCacheService.listPlaylists,
-  });
-
-  const todayQuery = useQuery({
-    queryKey: queryKeys.brainCacheToday(todayKey),
-    queryFn: brainCacheService.todayRevisions,
-    staleTime: 45_000,
-  });
-
-  const overdueQuery = useQuery({
-    queryKey: queryKeys.brainCacheOverdue(todayKey),
-    queryFn: brainCacheService.overdueRevisions,
-    staleTime: 45_000,
-  });
-
-  const analyticsQuery = useQuery({
-    queryKey: queryKeys.brainCacheAnalytics,
-    queryFn: brainCacheService.getAnalytics,
   });
 
   const smartSummaryQuery = useQuery({
@@ -87,7 +67,6 @@ export function BrainCachePage() {
     onSuccess: invalidate,
   });
 
-  const busy = revisionMutation.isPending;
   const playlists = playlistsQuery.data ?? [];
   const smartPending = smartSummaryQuery.data?.todayPending ?? 0;
 
@@ -118,7 +97,7 @@ export function BrainCachePage() {
           className="solve-btn btn-primary"
           startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
           onClick={() => setCreateOpen(true)}
-          sx={{ flexShrink: 0, textTransform: "none", fontWeight: 600 }}
+          sx={{ flexShrink: 0, textTransform: "none", fontWeight: 600, borderRadius: 0 }}
         >
           New playlist
         </Button>
@@ -155,42 +134,22 @@ export function BrainCachePage() {
       </Stack>
 
       <ScrollRegion pageClass={FLUENT_PAGE.brainCache} sx={{ pb: 0.5 }}>
-        <BrainCacheHero stats={analyticsQuery.data} loading={analyticsQuery.isLoading} embedded />
-
         {section === "smart" ? (
           <SmartRevisionsTab />
         ) : (
-          <>
-            <SectionCard title="Your playlists" bodySx={{ ...sectionContentSx, pt: 1.5, pb: 1.5 }}>
-              <BrainCachePlaylistExplorer
-                playlists={playlists}
-                loading={playlistsQuery.isLoading}
-                onDelete={(id) => deleteMutation.mutate(id)}
-                deleting={deleteMutation.isPending}
-              />
-            </SectionCard>
-
-            <BrainCacheRevisionsPanel
-              variant="today"
-              title="Today's revisions"
-              tasks={todayQuery.data ?? []}
+          <div className={panel.panel}>
+            <BrainCachePlaylistSection
+              playlists={playlists}
+              loading={playlistsQuery.isLoading}
+              onDelete={(id) => deleteMutation.mutate(id)}
+              deleting={deleteMutation.isPending}
+            />
+            <BrainCacheRevisionQueue
               onComplete={(id) => revisionMutation.mutate({ id, action: "complete" })}
               onSkip={(id) => revisionMutation.mutate({ id, action: "skip" })}
-              busy={busy}
-              emptyMessage="Nothing due — you've earned rest."
+              busy={revisionMutation.isPending}
             />
-
-            <BrainCacheRevisionsPanel
-              variant="overdue"
-              title="Overdue revisions"
-              tasks={overdueQuery.data ?? []}
-              onComplete={(id) => revisionMutation.mutate({ id, action: "complete" })}
-              onSkip={(id) => revisionMutation.mutate({ id, action: "skip" })}
-              busy={busy}
-              paginateByDay
-              emptyMessage="Backlog clear. Discipline is showing."
-            />
-          </>
+          </div>
         )}
       </ScrollRegion>
 

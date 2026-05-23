@@ -69,6 +69,15 @@
   --neutral-off-white: #e8ebf0;
   --neutral-white: #e8ebf0;
 
+  /* Revision panel (semantic aliases) */
+  --foreground: var(--neutral-off-white);
+  --muted-foreground: var(--neutral-muted);
+  --revision-border: var(--border);
+  --revision-row-hover: var(--bg-hover);
+  --revision-easy: #4caf50;
+  --revision-medium: #ff9800;
+  --revision-hard: #f44336;
+
   /* ── CTA ── */
   --cta-bg: #b0b8c4;
   --cta-text: #0a0b0d;

@@ -1,8 +1,12 @@
 import type {
+  AutoRevisionActivityResponse,
+  AutoRevisionFeedResponse,
+  AutoRevisionHistoryResponse,
   AutoRevisionMonthResponse,
   AutoRevisionSummary,
   AutoRevisionTodayGrouped,
   AutoRevisionWeekResponse,
+  RevisionFeedParams,
 } from "@/types/autoRevision.types";
 import { api, unwrap } from "./api";
 import { getClientTimezone } from "@/utils/timezone";
@@ -37,6 +41,33 @@ export const autoRevisionService = {
   summary(timezone?: string) {
     return unwrap<AutoRevisionSummary>(
       api.get("/api/v1/auto-revisions/summary", { params: tzParams(timezone) }),
+    );
+  },
+
+  feed(params: RevisionFeedParams = {}, timezone?: string) {
+    return unwrap<AutoRevisionFeedResponse>(
+      api.get("/api/v1/auto-revisions/feed", {
+        params: { ...params, ...tzParams(timezone) },
+      }),
+    );
+  },
+
+  history(
+    params: { page?: number; limit?: number; from?: string; to?: string; date?: string } = {},
+    timezone?: string,
+  ) {
+    return unwrap<AutoRevisionHistoryResponse>(
+      api.get("/api/v1/auto-revisions/history", {
+        params: { ...params, ...tzParams(timezone) },
+      }),
+    );
+  },
+
+  activity(months = 6, timezone?: string) {
+    return unwrap<AutoRevisionActivityResponse>(
+      api.get("/api/v1/auto-revisions/activity", {
+        params: { months, ...tzParams(timezone) },
+      }),
     );
   },
 

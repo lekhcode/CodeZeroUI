@@ -1,0 +1,343 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  color: var(--foreground);
+}
+
+.headerRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.progressTrack {
+  flex: 1;
+  height: 3px;
+  border-radius: 0;
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 0;
+  transition: width 200ms ease;
+}
+
+.progressLabel {
+  font-size: 12px;
+  font-family: var(--font-number);
+  color: var(--muted-foreground);
+  min-width: 36px;
+  text-align: right;
+}
+
+.tabBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 0.5px solid var(--revision-border);
+  margin-bottom: 0;
+  background: var(--bg-base);
+}
+
+.tabList {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab:hover {
+  color: var(--foreground);
+}
+
+.tabActive {
+  color: var(--foreground);
+  border-bottom-color: var(--foreground);
+}
+
+.tabBadge {
+  font-size: 11px;
+  font-family: var(--font-number);
+  color: var(--muted-foreground);
+}
+
+.tabActive .tabBadge {
+  color: var(--foreground);
+}
+
+.tabBarStart {
+  flex-shrink: 0;
+  padding-left: 2px;
+  padding-right: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.infoButton {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: help;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted-foreground);
+  border-radius: 0;
+}
+
+.infoButton:hover {
+  color: var(--foreground);
+  background: var(--revision-row-hover);
+}
+
+.listViewport {
+  flex: 1;
+  min-height: 0;
+}
+
+.empty {
+  padding: 32px 8px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.monthStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 10px 0 12px;
+  border-bottom: 0.5px solid var(--revision-border);
+}
+
+.monthStat {
+  text-align: center;
+}
+
+.monthStatValue {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-number);
+  color: var(--foreground);
+}
+
+.monthStatLabel {
+  display: block;
+  font-size: 11px;
+  color: var(--muted-foreground);
+  margin-top: 2px;
+}
+
+.monthNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.monthNavBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.monthNavBtn:hover:not(:disabled) {
+  color: var(--foreground);
+}
+
+.monthNavBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sectionLabel {
+  padding: 10px 4px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 8px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 4px;
+  border-bottom: 0.5px solid var(--revision-border);
+  min-height: 56px;
+  box-sizing: border-box;
+}
+
+.row:hover {
+  background: var(--revision-row-hover);
+}
+
+.rowRevised {
+  opacity: 0.45;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotEasy {
+  background: var(--revision-easy);
+}
+
+.dotMedium {
+  background: var(--revision-medium);
+}
+
+.dotHard {
+  background: var(--revision-hard);
+}
+
+.rowMain {
+  min-width: 0;
+}
+
+.rowTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.reviseBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--foreground);
+  padding: 4px 8px;
+}
+
+.reviseBtn:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.reviseBtn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.tagRevised {
+  font-size: 11px;
+  color: var(--success);
+  font-weight: 500;
+}
+
+.tagMissed {
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.redoBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--foreground);
+  padding: 2px 6px;
+}
+
+.redoBtn:hover {
+  text-decoration: underline;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 1400;
+  width: max-content;
+  max-width: 260px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--foreground);
+  background: var(--bg-elevated);
+  border: 0.5px solid var(--revision-border);
+  border-radius: 0;
+  pointer-events: none;
+  box-shadow: none;
+}
