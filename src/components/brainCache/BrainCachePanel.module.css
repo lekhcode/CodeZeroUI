@@ -28,12 +28,15 @@
   border: 0.5px solid var(--revision-border);
   background: var(--bg-surface);
   min-height: 280px;
+  max-height: clamp(280px, 52vh, 480px);
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
   .playlistShell {
     flex-direction: row;
     min-height: 320px;
+    max-height: clamp(320px, 52vh, 480px);
   }
 }
 
@@ -49,7 +52,8 @@
 @media (min-width: 768px) {
   .playlistSidebar {
     width: 240px;
-    max-height: none;
+    max-height: 100%;
+    min-height: 0;
     border-bottom: none;
     border-right: 0.5px solid var(--revision-border);
   }
@@ -96,12 +100,15 @@
 .playlistDetail {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .playlistDetailHeader {
   display: flex;
+  flex-shrink: 0;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
@@ -139,8 +146,11 @@
 
 .playlistProblems {
   flex: 1;
-  overflow: auto;
   min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .overdueDayNav {
