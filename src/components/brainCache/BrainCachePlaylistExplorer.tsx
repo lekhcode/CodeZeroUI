@@ -60,7 +60,8 @@ export function BrainCachePlaylistExplorer({
       sx={{
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
-        minHeight: { md: 380 },
+        minHeight: { xs: 280, md: 320 },
+        maxHeight: { xs: "clamp(280px, 52vh, 480px)", md: "clamp(320px, 52vh, 480px)" },
         border: `1px solid ${miui.border}`,
         borderRadius: 2,
         overflow: "hidden",
@@ -75,7 +76,8 @@ export function BrainCachePlaylistExplorer({
           flexShrink: 0,
           borderRight: { md: `1px solid ${miui.border}` },
           borderBottom: { xs: `1px solid ${miui.border}`, md: "none" },
-          maxHeight: { xs: 220, md: "none" },
+          maxHeight: { xs: 220, md: "100%" },
+          minHeight: { md: 0 },
           overflow: "auto",
           bgcolor: alpha(miui.bg, 0.5),
         }}
@@ -174,7 +176,16 @@ export function BrainCachePlaylistExplorer({
         </List>
       </Box>
 
-      <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         {selected ? (
           <>
             <Box
@@ -213,7 +224,17 @@ export function BrainCachePlaylistExplorer({
                 <DeleteOutlineRoundedIcon fontSize="small" />
               </IconButton>
             </Box>
-            <Box className="app-scroll" sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+            <Box
+              className="app-scroll"
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflowX: "hidden",
+                overflowY: "auto",
+                WebkitOverflowScrolling: "touch",
+                overscrollBehavior: "contain",
+              }}
+            >
               <BrainCachePlaylistProblemsList playlist={selected} />
             </Box>
           </>
