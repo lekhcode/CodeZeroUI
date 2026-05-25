@@ -1,4 +1,4 @@
-import { useEffect, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useEffect, useMemo, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { useFluentScroll } from "@/hooks/useFluentScroll";
 import { Alert, Box, CircularProgress, Typography, alpha } from "@mui/material";
 import { ProblemCatalogVirtualTable } from "@/components/problems/ProblemCatalogVirtualTable";
@@ -10,6 +10,7 @@ import {
   type CatalogFilterState,
 } from "@/hooks/useProblemCatalogInfinite";
 import { miui } from "@/theme/theme";
+import { catalogFiltersKey } from "@/utils/catalogFiltersKey";
 
 type ProblemCatalogInfiniteListProps = {
   filters: CatalogFilterState;
@@ -74,6 +75,8 @@ export function ProblemCatalogInfiniteList({
     fetchNextPage,
     solvedCount,
   } = useProblemCatalogInfinite(filters, pageSize, { preview });
+
+  const listEpochKey = useMemo(() => catalogFiltersKey(filters), [filters]);
 
   useEffect(() => {
     onListStats?.({ total, solvedCount });
@@ -195,6 +198,7 @@ export function ProblemCatalogInfiniteList({
       compact={compact}
       flat={flat}
       scrollRef={hasScrollRoot ? scrollRootRef : undefined}
+      listEpochKey={listEpochKey}
     />
   ) : (
     <ProblemCatalogStaticTable items={items} compact={compact} flat={flat} />

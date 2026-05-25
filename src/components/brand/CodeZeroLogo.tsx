@@ -1,5 +1,6 @@
 import { Box, Typography, type SxProps, type Theme } from "@mui/material";
 import { CodeZeroMark } from "./CodeZeroMark";
+import { useZeroMarkAutoSpin } from "@/hooks/useZeroMarkAutoSpin";
 import { miui } from "@/theme/theme";
 
 type CodeZeroLogoProps = {
@@ -12,6 +13,7 @@ export function CodeZeroLogo({ size = 36, compact = false, sx }: CodeZeroLogoPro
   const markSize = size;
   const pad = 4;
   const fontSize = compact ? 0 : Math.max(1, size / 20);
+  const setSpinTarget = useZeroMarkAutoSpin();
 
   return (
     <Box
@@ -64,7 +66,12 @@ export function CodeZeroLogo({ size = 36, compact = false, sx }: CodeZeroLogoPro
           boxShadow: `0 0 14px ${miui.brandOrangeSoft}`,
         }}
       >
-        <Box className="zero-mark-spin-target" sx={{ display: "flex", lineHeight: 0 }}>
+        <Box
+          component="span"
+          ref={setSpinTarget}
+          className="zero-mark-spin-target"
+          sx={{ display: "flex", lineHeight: 0 }}
+        >
           <CodeZeroMark size={markSize * 0.88} />
         </Box>
       </Box>
