@@ -1,6 +1,6 @@
-import { useLayoutEffect, type RefObject } from "react";
+import { useCallback, useLayoutEffect, useRef, type RefObject } from "react";
 import { Box } from "@mui/material";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { observeElementOffset, useVirtualizer } from "@tanstack/react-virtual";
 import type { ProblemCatalogItem } from "@/types/api.types";
 import { ProblemCatalogListHeader } from "@/components/problems/ProblemCatalogListHeader";
 import {
@@ -16,16 +16,39 @@ type ProblemCatalogVirtualTableProps = {
   compact?: boolean;
   flat?: boolean;
   scrollRef?: RefObject<HTMLDivElement | null>;
+  /** Changes when catalog filters change — remeasures and syncs scroll offset. */
+  listEpochKey?: string;
 };
+
+/** Distance from scroll-root content top to the virtual row container. */
+function measureListAnchorOffset(scrollEl: HTMLElement, listEl: HTMLElement): number {
+  const scrollRect = scrollEl.getBoundingClientRect();
+  const listRect = listEl.getBoundingClientRect();
+  return Math.max(0, Math.round(listRect.top - scrollRect.top + scrollEl.scrollTop));
+}
 
 export function ProblemCatalogVirtualTable({
   items,
   compact = false,
   flat = false,
   scrollRef,
+  listEpochKey = "",
 }: ProblemCatalogVirtualTableProps) {
   const rowHeight = PROBLEM_LIST_ROW_HEIGHT;
   const cols = gridColumns(compact);
+  const listBodyRef = useRef<HTMLDivElement>(null);
+  /** Ref only — scroll observer reads this; avoids baking margin into row translateY. */
+  const listAnchorOffsetRef = useRef(0);
+
+  const syncListAnchor = useCallback(() => {
+    const scrollEl = scrollRef?.current;
+    const listEl = listBodyRef.current;
+    if (!scrollEl || !listEl) {
+      listAnchorOffsetRef.current = 0;
+      return;
+    }
+    listAnchorOffsetRef.current = measureListAnchorOffset(scrollEl, listEl);
+  }, [scrollRef]);
 
   const virtualizer = useVirtualizer({
     count: items.length,
@@ -33,18 +56,57 @@ export function ProblemCatalogVirtualTable({
     estimateSize: () => rowHeight,
     overscan: 6,
     getItemKey: (index) => items[index]?.id ?? index,
+    observeElementOffset: (instance, cb) =>
+      observeElementOffset(instance, (offset, isScrolling) => {
+        cb(Math.max(0, offset - listAnchorOffsetRef.current), isScrolling);
+      }),
   });
 
   useLayoutEffect(() => {
+    syncListAnchor();
+    const scrollEl = scrollRef?.current;
+    const listEl = listBodyRef.current;
+    if (!scrollEl || !listEl) return;
+
+    const ro = new ResizeObserver(() => {
+      syncListAnchor();
+      virtualizer.measure();
+    });
+    ro.observe(scrollEl);
+    ro.observe(listEl);
+    scrollEl.addEventListener("scroll", syncListAnchor, { passive: true });
+    window.addEventListener("resize", syncListAnchor, { passive: true });
+
+    return () => {
+      ro.disconnect();
+      scrollEl.removeEventListener("scroll", syncListAnchor);
+      window.removeEventListener("resize", syncListAnchor);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- measure via epoch effect; avoid virtualizer dep loop
+  }, [scrollRef, syncListAnchor, listEpochKey, items.length]);
+
+  useLayoutEffect(() => {
+    syncListAnchor();
     virtualizer.measure();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- remeasure when list size changes
-  }, [items.length]);
+
+    const scrollEl = scrollRef?.current;
+    if (!scrollEl || items.length === 0) return;
+
+    const anchor = listAnchorOffsetRef.current;
+    const listSpan = anchor + virtualizer.getTotalSize();
+    const maxScrollTop = Math.max(0, listSpan - scrollEl.clientHeight);
+    if (scrollEl.scrollTop > maxScrollTop + 1) {
+      scrollEl.scrollTop = maxScrollTop;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- epoch + count drive sync
+  }, [listEpochKey, items.length]);
 
   return (
     <ProblemCatalogTableChrome flat={flat}>
       <Box sx={{ bgcolor: "transparent" }}>
         <ProblemCatalogListHeader compact={compact} />
         <Box
+          ref={listBodyRef}
           sx={{
             height: virtualizer.getTotalSize(),
             width: "100%",
