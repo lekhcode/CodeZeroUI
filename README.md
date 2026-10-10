@@ -10,7 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-**Organization:** LoopCode · **Created by:** Lekh Ray  
+**Organization:** LoopCode · Rights reserved by LoopCode  
 **Contact:** [whiletrue.codes@gmail.com](mailto:whiletrue.codes@gmail.com)
 
 </div>
@@ -23,8 +23,7 @@
 |---|---|
 | **Platform** | CodeZero — premium DSA training (schedules, spaced revision, Brain Cache, modern auth) |
 | **Organization** | LoopCode |
-| **Creator / CEO** | Lekh Ray |
-| **Copyright** | © 2026 LoopCode. All rights reserved. |
+| **Copyright** | © 2026 · Rights reserved by LoopCode |
 | **License** | Proprietary — see [LICENSE](./LICENSE) |
 | **Privacy** | `/privacy` |
 | **Terms** | `/terms` |
@@ -470,7 +469,7 @@ The architecture (query-key domains, feature modules, lazy routes) is built to a
 
 *Built with intent. Engineered for daily use.*
 
-© 2026 **LoopCode** · Created by **Lekh Ray**
+© 2026 · Rights reserved by **LoopCode**
 
 [Privacy](/privacy) · [Terms](/terms) · [Security](/security) · [License](/legal) · [LICENSE](./LICENSE)
 
