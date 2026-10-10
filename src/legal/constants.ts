@@ -2,7 +2,6 @@
 
 export const PLATFORM_NAME = "CodeZero";
 export const ORGANIZATION_NAME = "LoopCode";
-export const CREATOR_NAME = "Lekh Ray";
 export const COPYRIGHT_YEAR = 2026;
 export const CONTACT_EMAIL = "whiletrue.codes@gmail.com";
 export const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`;

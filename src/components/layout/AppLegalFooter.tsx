@@ -2,7 +2,6 @@ import { Box, Link, Typography } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import {
   COPYRIGHT_YEAR,
-  CREATOR_NAME,
   LEGAL_NAV_LINKS,
   ORGANIZATION_NAME,
   PLATFORM_NAME,
@@ -23,7 +22,7 @@ export function AppLegalFooter({
   collapsed = false,
 }: AppLegalFooterProps) {
   const metaAlign = align === "center" ? "app-legal-footer__meta--center" : "";
-  const ownershipLine = `© ${COPYRIGHT_YEAR} ${ORGANIZATION_NAME} · Created by ${CREATOR_NAME}`;
+  const ownershipLine = `© ${COPYRIGHT_YEAR} · Rights reserved by ${ORGANIZATION_NAME}`;
   const collapsedTitle = `${PLATFORM_NAME} — ${ownershipLine}. Privacy, Terms, Security, License.`;
 
   if (collapsed) {

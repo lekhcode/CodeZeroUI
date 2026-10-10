@@ -15,7 +15,7 @@ export const legalNotice: LegalPageMeta = {
         },
         {
           type: "paragraph",
-          text: "Created by Lekh Ray. Copyright © 2026 LoopCode. All rights reserved unless expressly granted in writing.",
+          text: "Copyright © 2026. Rights reserved by LoopCode unless expressly granted in writing.",
         },
       ],
     },
