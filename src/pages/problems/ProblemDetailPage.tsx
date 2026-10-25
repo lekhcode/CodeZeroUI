@@ -11,6 +11,10 @@ const ProblemJudgeWorkspace = lazy(() =>
   import("@/modules/judge/ProblemJudgeWorkspace").then((m) => ({ default: m.ProblemJudgeWorkspace })),
 );
 import { BrainCacheProblemPanel } from "@/components/brainCache/BrainCacheProblemPanel";
+import {
+  InterviewerHeaderPanelMount,
+  InterviewerHeaderSlotProvider,
+} from "@/modules/judge/interviewer/InterviewerHeaderSlot";
 import { problemsService } from "@/services/problems.service";
 import { judgeService } from "@/services/judge.service";
 import { queryKeys } from "@/hooks/queryKeys";
@@ -46,7 +50,11 @@ function ProblemTitleRow(props: {
         flexShrink: 0,
       }}
     >
-      <Typography variant="h6" component="h1" sx={{ fontWeight: 800, lineHeight: 1.25, fontSize: { xs: "1rem", sm: "1.125rem" } }}>
+      <Typography
+        variant="h6"
+        component="h1"
+        sx={{ fontWeight: 800, lineHeight: 1.25, fontSize: { xs: "1rem", sm: "1.125rem" } }}
+      >
         {title}
       </Typography>
       <DifficultyChip difficulty={difficulty} />
@@ -102,75 +110,113 @@ export function ProblemDetailPage() {
   }
 
   const loading = detailQuery.isLoading || judgeQuery.isLoading;
-  const errMsg =
-    detailQuery.isError === true ? (detailQuery.error as Error).message : null;
-  const judgeErr =
-    judgeQuery.isError === true ? (judgeQuery.error as Error).message : null;
+  const errMsg = detailQuery.isError === true ? (detailQuery.error as Error).message : null;
+  const judgeErr = judgeQuery.isError === true ? (judgeQuery.error as Error).message : null;
 
   return (
     <>
       <AutoRevisionReturnMarker />
-    <PageContainer
-      sx={{
-        maxWidth: "none",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0,
-        height: { xs: "calc(100dvh - 56px)", md: "calc(100dvh - 64px)" },
-        overflow: "hidden",
-        mx: { xs: 0.5, sm: 1 },
-        px: { xs: 1, sm: 1.5 },
-        py: { xs: 1, sm: 1.25 },
-      }}
-    >
-      {loading && <LoadingSkeleton variant="detail" />}
-      {errMsg && <Alert severity="error">{errMsg}</Alert>}
-      {judgeErr && !detailQuery.isError && <Alert severity="warning">{judgeErr}</Alert>}
+      <PageContainer
+        sx={{
+          maxWidth: "none",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+          height: { xs: "calc(100dvh - 56px)", md: "calc(100dvh - 64px)" },
+          overflow: "hidden",
+          mx: { xs: 0.5, sm: 1 },
+          px: { xs: 1, sm: 1.5 },
+          py: { xs: 1, sm: 1.25 },
+        }}
+      >
+        {loading && <LoadingSkeleton variant="detail" />}
+        {errMsg && <Alert severity="error">{errMsg}</Alert>}
+        {judgeErr && !detailQuery.isError && <Alert severity="warning">{judgeErr}</Alert>}
 
-      {detailQuery.data && judgeQuery.data && (
-        <Box
-          sx={{
-            width: "100%",
-            flex: 1,
-            minHeight: 0,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <ProblemTitleRow
-            title={detailQuery.data.title}
-            difficulty={detailQuery.data.difficulty}
-            isPremium={detailQuery.data.isPremium}
-            isAuthenticated={isAuthenticated}
-            judgeSolved={judgeQuery.data.solved}
-            recentSubmissions={judgeQuery.data.recentSubmissions}
-          />
+        {detailQuery.data && judgeQuery.data && (
+          <InterviewerHeaderSlotProvider>
+            <Box
+              sx={{
+                width: "100%",
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  alignItems: { xs: "stretch", sm: "center" },
+                  gap: { xs: 0.75, sm: 2 },
+                  flexShrink: 0,
+                  mb: 0.5,
+                  // Ambient blend from interviewer orb into the header black.
+                  background: {
+                    sm: `radial-gradient(55% 140% at 78% 50%,
+                      rgba(244, 114, 182, 0.08) 0%,
+                      rgba(124, 58, 237, 0.05) 35%,
+                      transparent 70%)`,
+                  },
+                }}
+              >
+                <Box sx={{ flexShrink: 0, maxWidth: { sm: "42%", md: "38%" }, minWidth: 0 }}>
+                  <ProblemTitleRow
+                    title={detailQuery.data.title}
+                    difficulty={detailQuery.data.difficulty}
+                    isPremium={detailQuery.data.isPremium}
+                    isAuthenticated={isAuthenticated}
+                    judgeSolved={judgeQuery.data.solved}
+                    recentSubmissions={judgeQuery.data.recentSubmissions}
+                  />
 
-          {isAuthenticated && judgeQuery.data ? (
-            <BrainCacheProblemPanel problemId={judgeQuery.data.problemId} slug={slug} />
-          ) : null}
+                  {isAuthenticated && judgeQuery.data ? (
+                    <BrainCacheProblemPanel problemId={judgeQuery.data.problemId} slug={slug} />
+                  ) : null}
 
-          <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", mb: 0.5, flexShrink: 0, gap: 0.5 }}>
-            {detailQuery.data.topics.map((t) => (
-              <Chip
-                key={t}
-                label={t}
-                size="small"
-                variant="outlined"
-                sx={{ height: 22, fontSize: 11, borderRadius: 0.5 }}
-              />
-            ))}
-          </Stack>
+                  <Stack
+                    direction="row"
+                    spacing={0.5}
+                    sx={{ flexWrap: "wrap", mb: 0.25, flexShrink: 0, gap: 0.5 }}
+                  >
+                    {detailQuery.data.topics.map((t) => (
+                      <Chip
+                        key={t}
+                        label={t}
+                        size="small"
+                        variant="outlined"
+                        sx={{ height: 22, fontSize: 11, borderRadius: 0.5 }}
+                      />
+                    ))}
+                  </Stack>
+                </Box>
 
-          <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <Suspense fallback={<LoadingSkeleton variant="detail" />}>
-              <ProblemJudgeWorkspace slug={slug} problem={detailQuery.data} judgeMeta={judgeQuery.data} />
-            </Suspense>
-          </Box>
-        </Box>
-      )}
-    </PageContainer>
+                <InterviewerHeaderPanelMount />
+              </Box>
+
+              <Box
+                sx={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Suspense fallback={<LoadingSkeleton variant="detail" />}>
+                  <ProblemJudgeWorkspace
+                    slug={slug}
+                    problem={detailQuery.data}
+                    judgeMeta={judgeQuery.data}
+                  />
+                </Suspense>
+              </Box>
+            </Box>
+          </InterviewerHeaderSlotProvider>
+        )}
+      </PageContainer>
     </>
   );
 }

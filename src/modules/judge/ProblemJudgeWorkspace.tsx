@@ -46,6 +46,8 @@ import type {
 } from "@/types/judge.types";
 import { judgeService } from "@/services/judge.service";
 import { CommunityRuntimeConfigPanel } from "@/modules/judge/communityRuntime/CommunityRuntimeConfigPanel";
+import { InterviewerStatusStrip } from "@/modules/judge/interviewer/InterviewerStatusStrip";
+import { useInterviewerSession } from "@/modules/judge/interviewer/useInterviewerSession";
 import { judgeUi } from "@/modules/judge/judgeWorkspaceUi";
 import { useAuthStore } from "@/store/authStore";
 import { learningProgressKeyPrefixes, queryKeys } from "@/hooks/queryKeys";
@@ -341,6 +343,13 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
   const [activeSampleIdx, setActiveSampleIdx] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [submission, setSubmission] = useState<JudgeSubmission | null>(null);
+  const interviewer = useInterviewerSession({
+    slug,
+    language,
+    code,
+    isAuthenticated,
+    submission,
+  });
   const [solutionOpen, setSolutionOpen] = useState(false);
   const [solutionSnap, setSolutionSnap] = useState<{
     language: string;
@@ -1200,6 +1209,20 @@ export function ProblemJudgeWorkspace({ slug, problem, judgeMeta }: ProblemJudge
                 }}
               />
             )}
+
+            <InterviewerStatusStrip
+              active={interviewer.active}
+              busy={interviewer.busy}
+              phase={interviewer.phase}
+              uiState={interviewer.uiState}
+              utterance={interviewer.utterance}
+              partial={interviewer.partial}
+              level={interviewer.level}
+              error={interviewer.error}
+              disabled={locked || !isAuthenticated}
+              onStart={() => void interviewer.start()}
+              onStop={interviewer.stop}
+            />
 
             <CommunityRuntimeConfigPanel
               problemId={judgeMeta.problemId}
